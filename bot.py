@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 import os
-import cogs
-import events
-import utils
+import python.cogs
+import python.events
+import python.utils
 
 extensions = [
     'cogs.general',
