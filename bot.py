@@ -31,4 +31,4 @@ async def on_ready():
     bot.appinfo = await bot.application_info()
 
 token = os.environ['DISCORD_TOKEN']
-bot.bot.run(token)
+bot.run(token)
