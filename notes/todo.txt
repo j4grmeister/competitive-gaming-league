@@ -1,0 +1,5 @@
+add server subscriptions and update server_subscription check
+rearrange role order
+recreate roles when deleted
+make commands not work in dms
+don't allow creating teams for games that don't have teams
