@@ -1,11 +1,4 @@
-import database
-import checks
 import cache
-import guilds
-import security
-import config
-import teams
-
 import uuid
 
 cache = cache.Cache()

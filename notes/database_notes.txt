@@ -1,16 +1,16 @@
 SERVER_TABLE:
 server_id BIGINT
-#owner_id BIGINT
+owner_id BIGINT
 requestable_roles JSON DEFAULT '{}' {'rolename': roleid}
 default_elo INTEGER DEFAULT 1300
 elo_k_factor INTEGER DEFAULT 64
 force_usernames BOOLEAN DEFAULT FALSE
 team_roles_enabled BOOLEAN DEFAULT FALSE
-default_role BIGINT DEFAULT NULL
+default_role BIGINT
 teams JSON DEFAULT '{}' {teamid: roleid(or none)} #adds free agent, still have to add teams
 region_roles_enabled BOOLEAN DEFAULT FALSE
 region_roles JSON DEFAULT '{}' {'region': roleid}
-games TEXT[] DEFAULT {'csgo'}
+games TEXT[] DEFAULT '{"csgo"}'
 hoist_roles BOOLEAN DEFAULT FALSE
 mention_roles BOOLEAN DEFAULT TRUE
 
@@ -29,6 +29,6 @@ team_id BIGINT
 team_name TEXT
 team_elo JSON DEFAULT '{}' {serverid: teamelo}
 game TEXT
-primary BIGINT[] DEFAULT '{}'
-subs BIGINT[] DEFAULT '{}'
+primary_players BIGINT[] DEFAULT '{}'
+sub_players BIGINT[] DEFAULT '{}'
 owner_id BIGINT

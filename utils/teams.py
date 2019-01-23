@@ -23,9 +23,9 @@ def team_game(team_id):
     return database.fetchone()[0]
 
 def primary_players(team_id):
-    database.execute(f"SELECT primary FROM team_table WHERE team_id={team_id};")
+    database.execute(f"SELECT primary_players FROM team_table WHERE team_id={team_id};")
     return database.fetchone()[0]
 
 def substitute_players(team_id):
-    database.execute(f"SELECT subs FROM team_table WHERE team_id={team_id};")
+    database.execute(f"SELECT sub_players FROM team_table WHERE team_id={team_id};")
     return database.fetchone()[0]
