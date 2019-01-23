@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import ../utils
+from competitive-gaming-league import utils
 import json
 
 class General:
