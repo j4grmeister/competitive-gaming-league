@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .. import utils
+import utils
 import json
 
 class Teams:
