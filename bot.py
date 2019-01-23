@@ -19,7 +19,7 @@ if __name__ == '__main__':
         try:
             bot.load_extension(ext)
         except Exception as e:
-            print(f"failed to load extension {ext}.")
+            print(f"failed to load extension {ext}.\n" + str(e))
 
 @bot.event
 async def on_ready():
