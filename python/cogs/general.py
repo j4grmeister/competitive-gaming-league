@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from python.utils import utils
+from python import utils
 import json
 
 class General:
