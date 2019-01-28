@@ -1,4 +1,4 @@
-import checks
+import python.utils.checks
 
 import uuid
 
