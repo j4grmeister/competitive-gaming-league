@@ -10,7 +10,7 @@ def server_subscription():
 
 def is_registered():
     async def predicate(ctx):
-        database.execute(f"SELECT username FROM player_table WHERE discordid={ctx.author.id};")
+        database.execute(f"SELECT username FROM player_table WHERE discord_id={ctx.author.id};")
         r = (database.fetchone() != None)
         if ctx.command.name != 'help' and not r:
             await ctx.send("You must be registered to use that command.\nYou can register with **!register <username>**")
@@ -19,7 +19,7 @@ def is_registered():
 
 def not_registered():
     async def predicate(ctx):
-        database.execute(f"SELECT username FROM player_table WHERE discordid={ctx.author.id};")
+        database.execute(f"SELECT username FROM player_table WHERE discord_id={ctx.author.id};")
         r = (database.fetchone() == None)
         if ctx.command.name != 'help' and not r:
             await ctx.send("You have already registered.\nYou can change your name with **!changename <username>**")
