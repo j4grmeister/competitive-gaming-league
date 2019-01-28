@@ -10,9 +10,9 @@ async def set_region(reaction, user):
     if target_userid != user.id:
         return True
     member_region = ""
-    if reaction.emoji = '🇺🇸':
+    if reaction.emoji == '🇺🇸':
         member_region = "NA"
-    elif reaction.emoji = '🇪🇺':
+    elif reaction.emoji == '🇪🇺':
         member_region = "EU"
     else:
         return True
