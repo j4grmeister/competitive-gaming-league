@@ -12,7 +12,7 @@ def is_registered():
     async def predicate(ctx):
         database.execute(f"SELECT username FROM player_table WHERE discord_id={ctx.author.id};")
         r = (database.fetchone() != None)
-        print(f"name = {ctx.command.name}")
+        print(f"name = {ctx.message}")
         if ctx.command.name != 'help' and not r:
             await ctx.send("You must be registered to use that command.\nYou can register with **!register <username>**")
         return r
