@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import python.utils
+from python import utils
 import json
 
 class Teams:
@@ -142,7 +142,7 @@ class Teams:
                 await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
                 return
             team_name = utils.teams.team_name(owned_teams[0])
-            e = discord.Embed(title="Team invite", description=f"From {ctx.author.mention}", colour=discord.Colour=blue())
+            e = discord.Embed(title="Team invite", description=f"From {ctx.author.mention}", colour=discord.Colour.blue())
             e.add_field(name=f"You have been invited to {team_name};", value=f"React with {utils.emoji_confirm} to accept or {utils.emoji_decline} to decline.")
             msg = await user.send(embed=e)
             await msg.add_reaction(utils.emoji_confirm)
