@@ -22,7 +22,7 @@ games = {
     'cod': {
         'has_teams': True,
         'primary_players': 5
-    }
+    },
     'smash': {
         'has_teams': False
     }
