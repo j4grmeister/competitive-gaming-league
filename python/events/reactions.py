@@ -238,7 +238,7 @@ async def invite_to_team(reaction, user):
         await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
         return True
     team_name = cached_data['team_name']
-    e = discord.Embed(title="Team invite", description=f"From {author.mention}", colour.discord.Colour=blue())
+    e = discord.Embed(title="Team invite", description=f"From {author.mention}", colour=discord.Colour.blue())
     e.add_field(name=f"You have been invited to {team_name};", value=f"React with {utils.emoji_confirm} to accept or {utils.emoji_decline} to decline.")
     nmsg = await target_user.send(embed=e)
     await nmsg.add_reaction(utils.emoji_confirm)
