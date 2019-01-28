@@ -1,8 +1,9 @@
 import discord
+from discord.ext import commands
 import python.utils
 import json
 
-bot = None
+bot = commands.Bot(command_prefix='!')
 
 async def set_region(reaction, user):
     msg = reaction.message

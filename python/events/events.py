@@ -1,8 +1,9 @@
 import discord
+from discord.ext import commands
 import python.utils
 from python.events import reactions
 
-bot = None
+bot = commands.Bot(command_prefix='!')
 
 reaction_handlers = [
     reactions.set_region,
