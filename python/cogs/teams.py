@@ -81,7 +81,7 @@ class Teams:
             utils.cache.add('create_team_message', msg.id, {'team_name': team_name, 'user': ctx.author.id, 'guild_games': guild_games})
 
     @team.command(pass_context=True)
-    @utils.checks.server_suscription()
+    @utils.checks.server_subscription()
     @utils.checks.is_team_owner()
     async def changename(self, ctx, *, team_name):
         if team_name == "":
