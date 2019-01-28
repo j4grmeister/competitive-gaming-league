@@ -2,6 +2,8 @@ import discord
 import python.utils
 import json
 
+bot = None
+
 async def set_region(reaction, user):
     msg = reaction.message
     target_userid = utils.cache.get('set_region_message', msg.id)
