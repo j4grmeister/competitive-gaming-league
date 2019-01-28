@@ -6,10 +6,10 @@ import python.events
 import python.utils
 
 extensions = [
-    'cogs.general',
-    'cogs.teams',
-    'events.events',
-    'utils.guilds'
+    'python.cogs.general',
+    'python.cogs.teams',
+    'python.events.events',
+    'python.utils.guilds'
 ]
 
 bot = commands.Bot(command_prefix='!')
