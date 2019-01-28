@@ -1,5 +1,5 @@
 import discord
-import python.utils.database
+from python.utils import database
 import json
 
 def player_elo(discordid):

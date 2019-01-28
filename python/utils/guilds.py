@@ -1,5 +1,5 @@
 import discord
-import python.utils.database
+from python.utils import database
 
 #def mutual_guilds(discordid):
 #    """returns all the mutual servers between the bot and the user with the provided id"""

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import python.utils
+from python import utils
 from python.events import reactions
 
 bot = commands.Bot(command_prefix='!')
