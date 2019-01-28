@@ -1,5 +1,5 @@
 import discord
-import database
+import python.utils.database
 import json
 
 def get_owned_teams(guild_id, user_id):

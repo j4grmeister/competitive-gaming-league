@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import database
+import python.utils.database
 
 def server_subscription():
     async def predicate(ctx):

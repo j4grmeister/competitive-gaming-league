@@ -1,6 +1,6 @@
 import discord
 import reactions
-from .. import utils
+import python.utils
 
 reaction_handlers = [
     reactions.set_region,

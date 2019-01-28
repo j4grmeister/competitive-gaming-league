@@ -1,5 +1,5 @@
 import discord
-from .. import utils
+import python.utils
 import json
 
 async def set_region(reaction, user):
