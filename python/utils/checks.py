@@ -37,7 +37,9 @@ def is_team_owner():
 
 def server_owner():
     async def predicate(ctx):
-        database.execute(f"SELECT owner_id FROM server_table WHERE server_id={ctx.guild.id};")
-        oid = database.fetchone()[0]
-        return (oid == ctx.author.id)
+        #TODO: actually validate this
+        #database.execute(f"SELECT owner_id FROM server_table WHERE server_id={ctx.guild.id};")
+        #oid = database.fetchone()[0]
+        #return (oid == ctx.author.id)
+        return True
     return commands.check(predicate)
