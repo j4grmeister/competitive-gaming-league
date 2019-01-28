@@ -53,7 +53,7 @@ class General:
                     utils.database.execute(f"SELECT region_roles -> '{member_region}' from server_table WHERE server_id={sid};")
                     region_role = utils.database.fetchone()[0]
                     await member.add_roles(guild.get_role(region_role))
-        utils.database.execute(f"UPDATE player_table SET elo=elo || '{json.dumps(default_elo)}'::json WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE player_table SET elo=elo || '{json.dumps(default_elo)}'::jsonb WHERE discord_id={ctx.author.id};")
         utils.database.execute(f"UPDATE player_table SET server_roles=server_roles || '{json.dumps(server_roles)}' WHERE discord_id={ctx.author.id};")
         #commit changes
         utils.database.commit()
