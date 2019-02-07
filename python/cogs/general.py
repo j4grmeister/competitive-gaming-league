@@ -70,7 +70,7 @@ class General:
         #escape single quotes to prevent SQL injection
         eusername = username
         eusername.replace("'", "''")
-        utils.database.execute(f"SELECT * FROM player_table WHERE lower(username)='{eusername.lower()}'';")
+        utils.database.execute(f"SELECT * FROM player_table WHERE lower(username)='{eusername.lower()}';")
         if utils.database.fetchone() != None:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
