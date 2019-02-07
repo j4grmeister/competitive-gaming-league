@@ -6,6 +6,7 @@ import json
 bot = commands.Bot(command_prefix='!')
 
 async def set_region(reaction, user):
+    print('set region')
     msg = reaction.message
     target_userid = utils.cache.get('set_region_message', msg.id)
     if target_userid == None:
