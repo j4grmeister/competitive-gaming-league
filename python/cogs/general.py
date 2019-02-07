@@ -54,7 +54,7 @@ class General:
                     region_role = utils.database.fetchone()[0]
                     await member.add_roles(guild.get_role(region_role))
         utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(default_elo)}'::jsonb WHERE discord_id={ctx.author.id};")
-        utils.database.execute(f"UPDATE player_table SET server_roles=server_roles || '{json.dumps(server_roles)}' WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id={ctx.author.id};")
         #commit changes
         utils.database.commit()
         #notify the user that they have successfully registered
