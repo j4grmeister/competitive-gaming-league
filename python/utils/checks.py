@@ -23,6 +23,8 @@ def not_registered():
         d = database.fetchone()
         print(d)
         r = (d == None)
+        print(r)
+        print(not r)
         if (not ctx.message.content.startswith('!help')) and (not r):
             await ctx.send("You have already registered.\nYou can change your name with **!changename <username>**")
         return r
