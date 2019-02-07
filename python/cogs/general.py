@@ -77,7 +77,7 @@ class General:
         #update the database
         utils.database.execute(f"UPDATE player_table SET username='{eusername}' WHERE discord_id={ctx.author.id};")
         #update nickname in all servers
-        utils.database.execute("SELECT server_id FROM servertable WHERE force_usernames=TRUE;")
+        utils.database.execute("SELECT server_id FROM server_table WHERE force_usernames=TRUE;")
         serverlist = utils.database.fetchall()
         for sid, in serverlist:
             member = self.bot.get_guild(sid).get_member(ctx.author.id)
