@@ -26,7 +26,7 @@ class General:
         #escape single quotes to prevent SQL injection
         eusername = utils.security.escape_sql(username)
         #check that the username is available
-        utils.database.execute(f"SELECT * FROM player_table WHERE lower(username)='{eusername.lower()}';")
+        utils.database.execute(f"SELECT discord_id FROM player_table WHERE lower(username)='{eusername.lower()}';")
         if utils.database.fetchone() != None:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
@@ -68,9 +68,9 @@ class General:
             await ctx.send("Spaces are not allowed in usernames.")
             return
         #escape single quotes to prevent SQL injection
-        eusername = username
-        eusername.replace("'", "''")
-        utils.database.execute(f"SELECT * FROM player_table WHERE lower(username)='{eusername.lower()}';")
+        eusername = utils.security.escape_sql(username)
+        #check that the username is available
+        utils.database.execute(f"SELECT discord_id FROM player_table WHERE lower(username)='{eusername.lower()}';")
         if utils.database.fetchone() != None:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
