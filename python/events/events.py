@@ -25,6 +25,7 @@ async def on_reaction_add(reaction, user):
 @bot.event
 async def on_guild_join(guild):
     utils.database.execute(f"INSERT INTO server_table (server_id) VALUES ({guild.id});")
+    utils.database.commit()
 
 @bot.event
 async def on_member_join(member):

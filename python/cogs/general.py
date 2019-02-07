@@ -39,7 +39,7 @@ class General:
         utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, region_roles_enabled FROM server_table;")
         serverlist = utils.database.fetchall()
         for sid, force, roles, region in serverlist:
-            guild = bot.get_guild(sid)
+            guild = self.bot.get_guild(sid)
             member = guild.get_member(ctx.author.id)
             if member != None:
                 default_elo[sid] = utils.database.server_setting(sid, 'default_elo')
