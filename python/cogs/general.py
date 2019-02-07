@@ -33,26 +33,19 @@ class General:
         #enter the user in the database
         utils.database.execute(f"INSERT INTO player_table (discord_id, username) values ({ctx.author.id}, '{eusername}');")
         #apply server settings in all servers
-        member_region = utils.database.player_setting(ctx.author.id, 'region')
         default_elo = {}
-        server_roles= {}
-        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, region_roles_enabled FROM server_table;")
+        server_roles = {}
+        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled FROM server_table;")
         serverlist = utils.database.fetchall()
-        for sid, force, roles, region in serverlist:
+        for sid, force, roles in serverlist:
             guild = self.bot.get_guild(sid)
             member = guild.get_member(ctx.author.id)
             if member != None:
                 default_elo[sid] = utils.database.server_setting(sid, 'default_elo')
-                servers_dict_empty[sid] = []
                 if force:
                     await member.edit(nick=username)
                 if roles:
                     await member.add_roles(guild.get_role(utils.database.server_setting(sid, 'default_role')))
-                    #TODO: add/create team role if player is on a team
-                if region:
-                    utils.database.execute(f"SELECT region_roles -> '{member_region}' from server_table WHERE server_id={sid};")
-                    region_role = utils.database.fetchone()[0]
-                    await member.add_roles(guild.get_role(region_role))
         utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(default_elo)}'::jsonb WHERE discord_id={ctx.author.id};")
         utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id={ctx.author.id};")
         #commit changes
