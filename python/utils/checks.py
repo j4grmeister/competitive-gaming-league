@@ -20,7 +20,9 @@ def is_registered():
 def not_registered():
     async def predicate(ctx):
         database.execute(f"SELECT username FROM player_table WHERE discord_id={ctx.author.id};")
-        r = (database.fetchone() == None)
+        d = database.fetchone()
+        print(d)
+        r = (d == None)
         if (not ctx.message.content.startswith('!help')) and (not r):
             await ctx.send("You have already registered.\nYou can change your name with **!changename <username>**")
         return r
