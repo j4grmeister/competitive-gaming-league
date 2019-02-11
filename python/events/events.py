@@ -20,7 +20,7 @@ class Events:
         if user.id != self.bot.user.id:
             for handler in reaction_handlers:
                 #only try handling again if the handle function returns false (indicating the reaction wasn't handled)
-                if await handler(bot, reaction, user):
+                if await handler(self.bot, reaction, user):
                     break
 
     async def on_guild_join(self, guild):
@@ -62,4 +62,3 @@ class Events:
 
 def setup(b):
     bot.add_cog(Events(bot))
-    #reactions.setup(b)
