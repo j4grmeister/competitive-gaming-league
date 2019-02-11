@@ -16,7 +16,7 @@ def team_name(team_id):
 
 def team_elo(team_id):
     database.execute(f"SELECT team_elo FROM team_table WHERE team_id={team_id};")
-    return json.loads(database.fetchone()[0])
+    return database.fetchone()[0]
 
 def team_game(team_id):
     database.execute(f"SELECT game FROM team_table WHERE team_id={team_id};")
