@@ -107,7 +107,7 @@ async def create_team(bot, reaction, user):
         if member != None:
             utils.database.execute(f"SELECT elo -> '{guild.id}' FROM player_table WHERE discord_id={target_userid};")
             team_elo[sid] = utils.database.fetchone()[0]
-            troleid = 'NULL'
+            troleid = '0' #0 means no role
             if team_roles_enabled:
                 drole = guild.get_role(default_role)
                 await member.remove_roles(drole)
@@ -116,9 +116,9 @@ async def create_team(bot, reaction, user):
                 troleid = trole.id
             utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
     #create the team's database entry
-    utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primaries) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{team_elo}', '{{{target_userid}}}');")
+    utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primary_players) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{team_elo}', '{{{target_userid}}}');")
     #add the user to the team
-    utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": teamid}}'::jsonb WHERE discord_id={target_userid};")
+    utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={target_userid};")
     #commit changes
     utils.database.commit()
     utils.cache.delete('create_team_message', msg.id)
