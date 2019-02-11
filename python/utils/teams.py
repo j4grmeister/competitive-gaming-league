@@ -3,7 +3,7 @@ from python.utils import database
 import json
 
 def get_owned_teams(guild_id, user_id):
-    database.execute(f"SELECT team_id FROM team_table WHERE owner_id={user_id} AND game=ANY(SELECT games FROM server_table WHERE server_id={guild_id});")
+    database.execute(f"SELECT team_id FROM team_table WHERE owner_id={user_id} AND game=ANY(SELECT UNNEST(games) AS games FROM server_table WHERE server_id={guild_id});")
     teams = database.fetchall()
     r = []
     for t, in teams:
