@@ -17,8 +17,11 @@ class Events:
         self.bot = bot
 
     async def on_reaction_add(self, reaction, user):
+        print('on_reaction_add')
         if user.id != self.bot.user.id:
+            print('not bot user')
             for handler in reaction_handlers:
+                print('trying handler')
                 #only try handling again if the handle function returns false (indicating the reaction wasn't handled)
                 if await handler(self.bot, reaction, user):
                     break
