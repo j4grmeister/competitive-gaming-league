@@ -189,7 +189,7 @@ async def team_invite(bot, reaction, user):
         utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{game}\": {team_id}}}'::jsonb WHERE discord_id={user.id};")
         #TODO: iterate through servers with the team in them instead of iterating through servers the team has an elo setting for
         team_elo = utils.teams.team_elo(team_id)
-        player_elo = utils.teams.player_elo(user.id)
+        player_elo = utils.users.player_elo(user.id)
         for server in team_elo:
             before_elo = team_elo[server]
             utils.database.execute(f"SELECT default_elo FROM server_table WHERE server_id={server};")
