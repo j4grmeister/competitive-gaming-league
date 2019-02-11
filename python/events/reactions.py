@@ -116,7 +116,7 @@ async def create_team(bot, reaction, user):
                 troleid = trole.id
             utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
     #create the team's database entry
-    utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primary_players) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{team_elo}', '{{{target_userid}}}');")
+    utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primary_players) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{json.dumps(team_elo)}', '{{{target_userid}}}');")
     #add the user to the team
     utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={target_userid};")
     #commit changes
