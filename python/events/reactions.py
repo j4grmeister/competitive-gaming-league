@@ -87,7 +87,7 @@ async def create_team(bot, reaction, user):
         return True
     team_name = cached_data['team_name']
     #check that the player isnt already on a team for this server's game
-    utils.database.execute(f"SELECT teams::jsonb -> '{game}' FROM player_table WHERE discord_id={target_userid};")
+    utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={target_userid};")
     player_team = utils.database.fetchone()[0]
     if player_team != None:
         await ctx.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
@@ -174,7 +174,7 @@ async def team_invite(bot, reaction, user):
     if reaction.emoji == utils.emoji_confirm:
         game = utils.teams.team_game(team_id)
         #check that the player is not already on a team for this game
-        utils.database.execute(f"SELECT teams::jsonb -> '{game}' FROM player_table WHERE discord_id={user.id};")
+        utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={user.id};")
         player_team = utils.database.fetchone()[0]
         if player_team != None:
             await msg.delete()
@@ -232,7 +232,7 @@ async def invite_to_team(bot, reaction, user):
         return True
     #check that the player is not already on a team for this game
     game = utils.teams.team_game(owned_teams[0])
-    utils.database.execute(f"SELECT teams::jsonb -> '{game}' FROM player_table WHERE discord_id={target_user.id};")
+    utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={target_user.id};")
     player_team = utils.database.fetchone()[0]
     if player_team != None:
         await msg.delete()
