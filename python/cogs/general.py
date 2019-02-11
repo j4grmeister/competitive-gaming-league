@@ -41,7 +41,7 @@ class General:
             guild = self.bot.get_guild(sid)
             member = guild.get_member(ctx.author.id)
             if member != None:
-                default_elo[sid] = utils.database.server_setting(sid, 'default_elo')
+                default_elo[f"'{sid}'"] = utils.database.server_setting(sid, 'default_elo')
                 if force:
                     await member.edit(nick=username)
                 if roles:

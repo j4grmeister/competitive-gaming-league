@@ -41,7 +41,7 @@ class Teams:
                 guild = self.bot.get_guild(sid)
                 member = guild.get_member(ctx.author.id)
                 if member != None:
-                    utils.database.execute(f"SELECT elo -> {guild.id} FROM player_table WHERE discord_id={ctx.author.id};")
+                    utils.database.execute(f"SELECT elo -> '{guild.id}' FROM player_table WHERE discord_id={ctx.author.id};")
                     team_elo[sid] = utils.database.fetchone()[0]
                     troleid = 'NULL'
                     if team_roles_enabled:
@@ -50,11 +50,11 @@ class Teams:
                         trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                         await member.add_roles(trole)
                         troleid = trole.id
-                    utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{{teamid}: {troleid}}}'::jsonb WHERE server_id={sid};")
+                    utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
             #create the team's database entry
-            utils.database.execute(f"INSERT INTO team_table (team_id, game, team_name, team_elo, primaries) VALUES ({teamid}, '{guild_games[0]}', '{eteam_name}', '{team_elo}', '{{{ctx.author.id}}}');")
+            utils.database.execute(f"INSERT INTO team_table (team_id, game, team_name, team_elo, primaries) VALUES ({teamid}, '{guild_games[0]}', '{eteam_name}', '{team_elo}', '{{\"{ctx.author.id}\"}}');")
             #add the user to the team
-            utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{'{guild_games[0]}': teamid}}'::jsonb WHERE discord_id={ctx.author.id};")
+            utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": teamid}}'::jsonb WHERE discord_id={ctx.author.id};")
             #commit changes
             utils.database.commit()
             await ctx.send("Your team has been created.")

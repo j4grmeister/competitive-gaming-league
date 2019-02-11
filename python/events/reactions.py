@@ -44,7 +44,7 @@ async def get_roles(bot, reaction, user):
         return True
     server_roles = json.loads(utils.database.server_setting(ctx.guild.id, 'requestable_roles'))
     #not sure if this little bit works
-    utils.database.execute(f"SELECT server_roles -> {guild.id} FROM player_table WHERE discord_id={user.id};")
+    utils.database.execute(f"SELECT server_roles -> '{guild.id}' FROM player_table WHERE discord_id={user.id};")
     member_roles = json.loads(utils.database.fetchone()[0])
     #end of uncertainty
     allreactions = msg.reactions
@@ -105,7 +105,7 @@ async def create_team(bot, reaction, user):
         guild = bot.get_guild(sid)
         member = guild.get_member(target_userid)
         if member != None:
-            utils.database.execute(f"SELECT elo -> {guild.id} FROM player_table WHERE discord_id={target_userid};")
+            utils.database.execute(f"SELECT elo -> '{guild.id}' FROM player_table WHERE discord_id={target_userid};")
             team_elo[sid] = utils.database.fetchone()[0]
             troleid = 'NULL'
             if team_roles_enabled:
@@ -114,7 +114,7 @@ async def create_team(bot, reaction, user):
                 trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                 await member.add_roles(trole)
                 troleid = trole.id
-            utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{{teamid}: {troleid}}}'::jsonb WHERE server_id={sid};")
+            utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
     #create the team's database entry
     utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primaries) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{team_elo}', '{{{target_userid}}}');")
     #add the user to the team
@@ -198,7 +198,7 @@ async def team_invite(bot, reaction, user):
                 p_elo = player_elo[server]
             else:
                 #TODO: turn this into a single SQL query
-                utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{{{server}: {p_elo}}}'::jsonb WHERE discord_id={user.id};")
+                utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{{\"{server}\": {p_elo}}}'::jsonb WHERE discord_id={user.id};")
             after_elo = (before_elo * teamsize + utils.users.team) / teamsize + 1
             team_elo[server] = after_elo
         if is_primary:
