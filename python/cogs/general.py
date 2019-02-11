@@ -106,7 +106,7 @@ class General:
     async def getroles(self, ctx):
         """Request server roles."""
         e = discord.Embed(title="Get Roles", description=ctx.author.mention, colour=discord.Colour.blue())
-        roles = json.loads(utils.database.server_setting(ctx.guild.id, 'requestable_roles'))
+        roles = utils.database.server_setting(ctx.guild.id, 'requestable_roles')
         field_value = ""
         valid = True
         role_count = 0
