@@ -63,5 +63,5 @@ class Events:
         guild = role.guild
         #TODO: recreate roles when deleted
 
-def setup(b):
+def setup(bot):
     bot.add_cog(Events(bot))
