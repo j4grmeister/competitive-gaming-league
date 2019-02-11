@@ -42,7 +42,7 @@ async def get_roles(bot, reaction, user):
         return True
     if reaction.emoji != utils.emoji_confirm:
         return True
-    server_roles = json.loads(utils.database.server_setting(ctx.guild.id, 'requestable_roles'))
+    server_roles = json.loads(utils.database.server_setting(msg.channel.guild.id, 'requestable_roles'))
     #not sure if this little bit works
     utils.database.execute(f"SELECT server_roles -> '{guild.id}' FROM player_table WHERE discord_id={user.id};")
     member_roles = json.loads(utils.database.fetchone()[0])
@@ -90,7 +90,7 @@ async def create_team(bot, reaction, user):
     utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={target_userid};")
     player_team = utils.database.fetchone()[0]
     if player_team != None:
-        await ctx.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
+        await msg.channel.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
         return
     #generate an id for the team
     teamid = utils.generate_id()
@@ -123,7 +123,7 @@ async def create_team(bot, reaction, user):
     utils.database.commit()
     utils.cache.delete('create_team_message', msg.id)
     await msg.delete()
-    await ctx.send("Your team has been created.")
+    await msg.channel.send("Your team has been created.")
     return True
 
 async def change_team_name(bot, reaction, user):
@@ -160,7 +160,7 @@ async def change_team_name(bot, reaction, user):
     utils.database.commit()
     utils.cache.delete('change_team_name_message', msg.id)
     await msg.delete()
-    await ctx.send("Your team name has been changed.")
+    await msg.channel.send("Your team name has been changed.")
 
 async def team_invite(bot, reaction, user):
     msg = reaction.message
@@ -179,7 +179,7 @@ async def team_invite(bot, reaction, user):
         if player_team != None:
             await msg.delete()
             utils.cache.delete('team_invite_message', msg.id)
-            await ctx.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
+            await msg.channel.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
             return True
         max_primary = utils.config.games[game]['primary_players']
         primary = len(utils.teams.primary_players(team_id))
@@ -208,7 +208,7 @@ async def team_invite(bot, reaction, user):
         utils.database.commit()
         await msg.delete()
         utils.cache.delete('team_invite_message', msg.id)
-        await ctx.send(f"You have joined {utils.teams.team_name(team_id)}.")
+        await msg.channel.send(f"You have joined {utils.teams.team_name(team_id)}.")
         return True
     return True
 
@@ -237,7 +237,7 @@ async def invite_to_team(bot, reaction, user):
     if player_team != None:
         await msg.delete()
         utils.cache.delete('invite_to_team_message', msg.id)
-        await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
+        await msg.channel.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
         return True
     team_name = cached_data['team_name']
     e = discord.Embed(title="Team invite", description=f"From {author.mention}", colour=discord.Colour.blue())
