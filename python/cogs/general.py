@@ -43,7 +43,8 @@ class General:
             if member != None:
                 default_elo[f"{sid}"] = utils.database.server_setting(sid, 'default_elo')
                 if force:
-                    await member.edit(nick=username)
+                    if member.id != guild.owner.id:
+                        await member.edit(nick=username)
                 if roles:
                     await member.add_roles(guild.get_role(utils.database.server_setting(sid, 'default_role')))
         utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(default_elo)}'::jsonb WHERE discord_id={ctx.author.id};")
