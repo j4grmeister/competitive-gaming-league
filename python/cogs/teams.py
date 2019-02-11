@@ -54,7 +54,7 @@ class Teams:
             #create the team's database entry
             utils.database.execute(f"INSERT INTO team_table (team_id, game, team_name, team_elo, primaries) VALUES ({teamid}, '{guild_games[0]}', '{eteam_name}', '{team_elo}', '{{\"{ctx.author.id}\"}}');")
             #add the user to the team
-            utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": teamid}}'::jsonb WHERE discord_id={ctx.author.id};")
+            utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={ctx.author.id};")
             #commit changes
             utils.database.commit()
             await ctx.send("Your team has been created.")
