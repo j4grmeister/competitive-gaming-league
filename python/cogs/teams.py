@@ -52,7 +52,7 @@ class Teams:
                         troleid = trole.id
                     utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
             #create the team's database entry
-            utils.database.execute(f"INSERT INTO team_table (team_id, game, team_name, team_elo, primary_players) VALUES ({teamid}, '{guild_games[0]}', '{eteam_name}', '{json.dumps(team_elo)}', '{{{ctx.author.id}}}');")
+            utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primary_players) VALUES ({ctx.author.id}, {teamid}, '{guild_games[0]}', '{eteam_name}', '{json.dumps(team_elo)}', '{{{ctx.author.id}}}');")
             #add the user to the team
             utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={ctx.author.id};")
             #commit changes
