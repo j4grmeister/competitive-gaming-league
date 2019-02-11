@@ -18,7 +18,7 @@ class Teams:
             await ctx.send("Please provide a team name.")
             return
         #get the list of games for this server
-        guild_games = json.loads(utils.database.server_setting(ctx.guild.id, 'games'))
+        guild_games = utils.database.server_setting(ctx.guild.id, 'games')
         #if there is only 1 game for this server
         #continue creating the team
         if len(guild_games) == 1:
@@ -84,8 +84,7 @@ class Teams:
         if len(owned_teams) == 1:
             utils.database.execute("SELECT server_id, teams FROM server_table WHERE team_roles_enabled=TRUE;")
             allservers = utils.database.fetchall()
-            for sid, teams_json in allservers:
-                teams = json.loads(teams_json)
+            for sid, teams in allservers:
                 if owned_teams[0] in teams:
                     guild = self.bot.get_guild(sid)
                     role = guild.get_role(teams[owned_teams[0]])
