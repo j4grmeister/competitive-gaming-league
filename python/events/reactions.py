@@ -199,7 +199,7 @@ async def team_invite(bot, reaction, user):
             else:
                 #TODO: turn this into a single SQL query
                 utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{{\"{server}\": {p_elo}}}'::jsonb WHERE discord_id={user.id};")
-            after_elo = (before_elo * teamsize + utils.users.team) / teamsize + 1
+            after_elo = (before_elo * teamsize + p_elo) / teamsize + 1
             team_elo[server] = after_elo
         if is_primary:
             utils.database.execute(f"UPDATE team_table SET primary=array_append(primary, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
