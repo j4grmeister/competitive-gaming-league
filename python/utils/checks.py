@@ -28,7 +28,7 @@ def not_registered():
 
 def is_team_owner():
     async def predicate(ctx):
-        database.execute(f"SELECT team_id FROM team_table WHERE owner_id={ctx.author.id} AND game=<@(SELECT games FROM server_table WHERE server_id={ctx.guild.id})::ARRAY;")
+        database.execute(f"SELECT team_id FROM team_table WHERE owner_id={ctx.author.id} AND game=ANY(SELECT UNNEST(games) as games FROM server_table WHERE server_id={ctx.guild.id});")
         team_id = database.fetchone()
         if team_id == None:
             return False
