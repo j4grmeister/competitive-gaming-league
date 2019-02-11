@@ -202,9 +202,9 @@ async def team_invite(bot, reaction, user):
             after_elo = (before_elo * teamsize + p_elo) / teamsize + 1
             team_elo[server] = after_elo
         if is_primary:
-            utils.database.execute(f"UPDATE team_table SET primary=array_append(primary, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
+            utils.database.execute(f"UPDATE team_table SET primary_players=array_append(primary_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
         else:
-            utils.database.execute(f"UPDATE team_table SET subs=array_append(subs, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
+            utils.database.execute(f"UPDATE team_table SET substitute_players=array_append(substitute_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
         utils.database.commit()
         await msg.delete()
         utils.cache.delete('team_invite_message', msg.id)
