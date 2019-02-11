@@ -7,17 +7,10 @@ class Teams:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True)
+    @commands.command(pass_context=True)
     @utils.checks.server_subscription()
     @utils.checks.is_registered()
-    async def team(self, ctx):
-        """Utilities for creating, joining, and managing teams."""
-        await ctx.send("See **!help team** for a list of subcommands.")
-
-    @team.command(pass_context=True)
-    @utils.checks.server_subscription()
-    @utils.checks.is_registered()
-    async def create(self, ctx, *, team_name):
+    async def createteam(self, ctx, *, team_name):
         """Create a new team.
         Creates a new team with this server's default game.
         You cannot be on more than one team per game."""
@@ -80,10 +73,10 @@ class Teams:
                 await msg.add_reaction(utils.emoji_list[x])
             utils.cache.add('create_team_message', msg.id, {'team_name': team_name, 'user': ctx.author.id, 'guild_games': guild_games})
 
-    @team.command(pass_context=True)
+    @commands.command(pass_context=True)
     @utils.checks.server_subscription()
     @utils.checks.is_team_owner()
-    async def changename(self, ctx, *, team_name):
+    async def changeteamname(self, ctx, *, team_name):
         if team_name == "":
             await ctx.send("Please provide a team name.")
             return
@@ -118,7 +111,7 @@ class Teams:
                 await msg.add_reaction(utils.emoji_list[x])
             utils.cache.add('change_team_name_message', msg.id, {'team_name': team_name, 'user': ctx.author.id, 'owned_teams': owned_teams})
 
-    @team.command(pass_context=True)
+    @commands.command(pass_context=True)
     @utils.checks.server_subscription()
     @utils.checks.is_team_owner()
     async def invite(self, ctx, user: discord.User):

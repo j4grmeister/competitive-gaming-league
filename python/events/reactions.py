@@ -3,9 +3,7 @@ from discord.ext import commands
 from python import utils
 import json
 
-bot = commands.Bot(command_prefix='!')
-
-async def set_region(reaction, user):
+async def set_region(bot, reaction, user):
     print('set region')
     msg = reaction.message
     target_userid = utils.cache.get('set_region_message', msg.id)
@@ -34,7 +32,7 @@ async def set_region(reaction, user):
     await msg.channel.send("Your region has been updated.")
     return True
 
-async def get_roles(reaction, user):
+async def get_roles(bot, reaction, user):
     msg = reaction.message
     guild = msg.guild
     target_userid = utils.cache.get('get_roles_message', msg.id)
@@ -68,7 +66,7 @@ async def get_roles(reaction, user):
     await msg.channel.send("Your roles have been updated.")
     return True
 
-async def create_team(reaction, user):
+async def create_team(bot, reaction, user):
     msg = reaction.message
     cached_data = utils.cache.get('create_team_message', msg.id)
     if cached_data == None:
@@ -128,7 +126,7 @@ async def create_team(reaction, user):
     await ctx.send("Your team has been created.")
     return True
 
-async def change_team_name(reaction, user):
+async def change_team_name(bot, reaction, user):
     msg = reaction.message
     cached_data = utils.cache.get('change_team_name_message', msg.id)
     if cached_data == None:
@@ -164,7 +162,7 @@ async def change_team_name(reaction, user):
     await msg.delete()
     await ctx.send("Your team name has been changed.")
 
-async def team_invite(reaction, user):
+async def team_invite(bot, reaction, user):
     msg = reaction.message
     team_id = utils.cache.get('team_invite_message', msg.id)
     if team_id == None:
@@ -214,7 +212,7 @@ async def team_invite(reaction, user):
         return True
     return True
 
-async def invite_to_team(reaction, user):
+async def invite_to_team(bot, reaction, user):
     msg = reaction.message
     cached_data = utils.cache.get('invite_to_team_message', msg.id)
     target_user = cached_data['user']
@@ -252,8 +250,3 @@ async def invite_to_team(reaction, user):
     utils.cache.delete('invite_to_team_message', msg.id)
     await msg.delete()
     return True
-
-
-def setup(b):
-    global bot
-    bot = b

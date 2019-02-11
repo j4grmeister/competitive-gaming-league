@@ -10,7 +10,8 @@ extensions = [
     'python.cogs.teams',
     'python.cogs.owner',
     'python.events.events',
-    'python.utils.guilds'
+    'python.utils.guilds',
+    'python.events.events'
 ]
 
 bot = commands.Bot(command_prefix='!')
