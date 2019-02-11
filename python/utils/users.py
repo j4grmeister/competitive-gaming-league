@@ -3,5 +3,5 @@ from python.utils import database
 import json
 
 def player_elo(discordid):
-    database.execute(f"SELECT elo FROM team_table WHERE team_id={team_id};")
-    return json.loads(database.fetchone()[0])
+    database.execute(f"SELECT elo FROM player_table WHERE discord_id={discordid};")
+    return database.fetchone()[0]
