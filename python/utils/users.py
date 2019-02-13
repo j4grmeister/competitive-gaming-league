@@ -3,7 +3,7 @@ from python.utils import database
 import json
 
 def username(discordid):
-    database.execute(f"SELECT username FROM player_table WHERE discord_id={discordid})
+    database.execute(f"SELECT username FROM player_table WHERE discord_id={discordid};")
     return database.fetchone()[0]
 
 def player_elo(discordid):
