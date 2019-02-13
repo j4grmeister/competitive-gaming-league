@@ -35,10 +35,13 @@ class Events:
         #register the member in this league if they are registered with cgl
         utils.database.execute(f"SELECT * FROM player_table WHERE discord_id={member.id};")
         if utils.database.fetchone() != None:
-            utils.database.execute(f"SELECT default_elo, force_usernames, team_roles_enabled, region_roles_enabled FROM server_table WHERE server_id={guild.id};")
-            default_elo, force, roles, region = utils.database.fetchone()
-            utils.database.execute(f"UPDATE player_table SET elo=elo | '{{{guild.id}: {default_elo}}}' WHERE discord_id={member.id};")
-            utils.database.execute(f"UPDATE player_table SET server_roles=server_roles || '{{{guild.id}: []}}' WHERE discord_id={member.id};")
+            utils.database.execute(f"SELECT default_elo, force_usernames, team_roles_enabled, region_roles_enabled, games FROM server_table WHERE server_id={guild.id};")
+            default_elo, force, roles, region, games = utils.database.fetchone()
+            p_elo = {f"{guild.id}": {}}
+            for g in games:
+                p_elo[f"{guild.id}"][g] = default_elo
+            utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb | '{json.dumps(p_elo)}'::jsonb WHERE discord_id={member.id};")
+            utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{{{guild.id}: []}}'::jsonb WHERE discord_id={member.id};")
             if force:
                 await member.edit(nick=utils.database.player_setting(member.id, 'username'))
             if roles:

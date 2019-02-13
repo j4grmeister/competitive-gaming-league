@@ -35,13 +35,16 @@ class General:
         #apply server settings in all servers
         default_elo = {}
         server_roles = {}
-        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled FROM server_table;")
+        awards = {}
+        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, games FROM server_table;")
         serverlist = utils.database.fetchall()
-        for sid, force, roles in serverlist:
+        for sid, force, roles, games in serverlist:
             guild = self.bot.get_guild(sid)
             member = guild.get_member(ctx.author.id)
             if member != None:
-                default_elo[f"{sid}"] = utils.database.server_setting(sid, 'default_elo')
+                default_elo[f"{sid}"] = {}
+                for g in games:
+                    default_elo[f"{sid}"][g] = utils.database.server_setting(sid, 'default_elo')
                 if force:
                     if member.id != guild.owner.id:
                         await member.edit(nick=username)

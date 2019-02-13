@@ -6,6 +6,7 @@ import python.utils.guilds
 import python.utils.security
 import python.utils.teams
 import python.utils.users
+import python.utils.converters
 
 import uuid
 

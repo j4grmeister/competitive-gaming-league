@@ -105,7 +105,7 @@ async def create_team(bot, reaction, user):
         guild = bot.get_guild(sid)
         member = guild.get_member(target_userid)
         if member != None:
-            utils.database.execute(f"SELECT elo -> '{guild.id}' FROM player_table WHERE discord_id={target_userid};")
+            utils.database.execute(f"SELECT elo -> '{guild.id}' -> '{game}' FROM player_table WHERE discord_id={target_userid};")
             team_elo[f"{sid}"] = utils.database.fetchone()[0]
             troleid = '0' #0 means no role
             if team_roles_enabled:
@@ -192,13 +192,16 @@ async def team_invite(bot, reaction, user):
         player_elo = utils.users.player_elo(user.id)
         for server in team_elo:
             before_elo = team_elo[server]
-            utils.database.execute(f"SELECT default_elo FROM server_table WHERE server_id={server};")
-            p_elo = utils.database.fetchone()[0]
+            utils.database.execute(f"SELECT default_elo, games FROM server_table WHERE server_id={server};")
+            p_elo, games = utils.database.fetchone()
             if server in player_elo:
-                p_elo = player_elo[server]
+                p_elo = player_elo[f"{server}"][game]
             else:
                 #TODO: turn this into a single SQL query
-                utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{{\"{server}\": {p_elo}}}'::jsonb WHERE discord_id={user.id};")
+                ejson = {f"{server}": {}}
+                for g in games:
+                    ejson[f"{server}"][g] = p_elo
+                utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(ejson)}'::jsonb WHERE discord_id={user.id};")
             after_elo = (before_elo * teamsize + p_elo) / teamsize + 1
             team_elo[server] = after_elo
         if is_primary:

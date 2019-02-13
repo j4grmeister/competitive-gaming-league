@@ -41,7 +41,7 @@ class Teams:
                 guild = self.bot.get_guild(sid)
                 member = guild.get_member(ctx.author.id)
                 if member != None:
-                    utils.database.execute(f"SELECT elo -> '{guild.id}' FROM player_table WHERE discord_id={ctx.author.id};")
+                    utils.database.execute(f"SELECT elo -> '{guild.id}' -> '{guild_games[0]}' FROM player_table WHERE discord_id={ctx.author.id};")
                     team_elo[f"{sid}"] = utils.database.fetchone()[0]
                     troleid = '0' #0 means no role
                     if team_roles_enabled:

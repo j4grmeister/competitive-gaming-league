@@ -8,6 +8,7 @@ import python.utils
 extensions = [
     'python.cogs.general',
     'python.cogs.teams',
+    'python.cogs.stats',
     'python.cogs.owner',
     'python.events.events',
     'python.utils.guilds',

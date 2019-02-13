@@ -17,12 +17,12 @@ mention_roles BOOLEAN DEFAULT TRUE
 PLAYER_TABLE:
 discord_id BIGINT
 username TEXT
-elo JSON DEFAULT '{}' {serverid: elo}
+elo JSON DEFAULT '{}' {'serverid': {'game': elo}}
 #steam_id TEXT
 teams JSON DEFAULT '{}' {'game': teamid}
-#awards JSON DEFAULT '{}' {serverid: ["award"]}
+#awards JSON DEFAULT '{}' {'serverid': ["award"]}
 region TEXT
-server_roles JSON DEFAULT '{}' {serverid: [roleid]}
+server_roles JSON DEFAULT '{}' {'serverid': [roleid]}
 
 TEAM_TABLE:
 team_id BIGINT
@@ -30,5 +30,5 @@ team_name TEXT
 team_elo JSON DEFAULT '{}' {serverid: teamelo}
 game TEXT
 primary_players BIGINT[] DEFAULT '{}'
-sub_players BIGINT[] DEFAULT '{}'
+substitute_players BIGINT[] DEFAULT '{}'
 owner_id BIGINT
