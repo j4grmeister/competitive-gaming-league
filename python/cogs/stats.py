@@ -7,11 +7,11 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True)
-    async def player_info(self, ctx, player: utils.converters.CGL_User):
+    async def playerinfo(self, ctx, player: utils.converters.CGL_User):
         if player == None:
             return
         #get player data
-        utils.database.execute(f"SELECT username, elo, -> '{ctx.guild.id}', teams, server_roles -> '{ctx.guild.id}', awards -> '{ctx.guild.id}' FROM player_table WHERE discord_id={player.id};")
+        utils.database.execute(f"SELECT username, elo -> '{ctx.guild.id}', teams, server_roles -> '{ctx.guild.id}', awards -> '{ctx.guild.id}' FROM player_table WHERE discord_id={player.id};")
         username, elo, teams, roles, awards = utils.database.fetchone()
         e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
         #elo and teams
