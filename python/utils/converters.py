@@ -4,6 +4,7 @@ from python.utils import database
 from python.utils import cache
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
+import python.utils.teams
 
 class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
@@ -32,19 +33,23 @@ class CGL_User(commands.UserConverter):
 class CGL_Team(commands.RoleConverter):
     async def convert(self, ctx, argument):
         #convert this into a team id, or None if it doesn't exist
-        #team = None
-        #try:
-        #    team = await super().convert(ctx, argument)
-        #    database.execute(f"SELECT team_id FROM team_table WHERE )
-        #except:
-        #    database.execute(f"SELECT )
-        finished = False
-        def done():
-            nonlocal finished
-            finished = True
-        msg = await ctx.send("react")
-        cache.add('test', msg.id, done)
-        while(not finished):
-            await asyncio.sleep(1)
-            print(finished)
-        return 'success'
+        team = None
+        try:
+            role = await super().convert(ctx, argument)
+            database.execute(f"SELECT team_id FROM json_each(SELECT teams FROM server_table WHERE server_id={ctx.guild.id}) AS (team_id KEY, role_id TEXT) WHERE role_id={role};")
+            team, = database.fetchone()
+            if team == None:
+                await ctx.send("That team doesn't exist")
+                return None
+        except:
+            database.execute(f"SELECT team_id FROM team_table WHERE lower(team_name)='{argument.lower()}';")
+            allteams = database.fetchall()
+            if allteams == None:
+                await ctx.send("That team doesn't exist")
+                return None
+            for i in range(len(allteams)):
+                allteams[i] = allteams[i][0]
+                team = teams.select_team(allteams)
+                if team == None:
+                    return None
+        return team

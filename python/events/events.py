@@ -10,6 +10,7 @@ reaction_handlers = [
     reactions.change_team_name,
     reactions.team_invite,
     reactions.invite_to_team,
+    reactions.select_team
 ]
 
 class Events:

@@ -7,7 +7,7 @@ elo_k_factor INTEGER DEFAULT 64
 force_usernames BOOLEAN DEFAULT FALSE
 team_roles_enabled BOOLEAN DEFAULT FALSE
 default_role BIGINT
-teams JSON DEFAULT '{}' {teamid: roleid(or none)} #adds free agent, still have to add teams
+teams JSON DEFAULT '{}' {'teamid': roleid(or none)}
 region_roles_enabled BOOLEAN DEFAULT FALSE
 region_roles JSON DEFAULT '{}' {'region': roleid}
 games TEXT[] DEFAULT '{"csgo"}'
