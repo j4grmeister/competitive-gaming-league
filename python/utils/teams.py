@@ -1,7 +1,6 @@
 import discord
 from python.utils import database
-from python.utils import emoji_list
-from python.utils import cache
+import python.utils
 import json
 import asyncio
 
@@ -44,17 +43,17 @@ async def select_team(ctx, user, team_list):
         tids.append(team_id)
         if len(liststr) > 0:
             liststr += '\n'
-        liststr += f"{emoji_list[count]} {team_name} **({game})**"
+        liststr += f"{utils.emoji_list[count]} {team_name} **({game})**"
         count += 1
     e.add_field(name='Select a team', value=liststr)
     msg = await ctx.send(embed=e)
     for x in range(count):
-        await msg.add_reaction(emoji_list[x])
+        await msg.add_reaction(utils.emoji_list[x])
     selected_team = None
     def done(team):
         nonlocal selected_team
         selected_team = team
-    cache.add('select_team', msg.id, {'teams': tids, 'author': user, 'done': done})
+    utils.cache.add('select_team', msg.id, {'teams': tids, 'author': user, 'done': done})
     time = 0
     while selected_team == None:
         asyncio.sleep(1)
@@ -64,6 +63,6 @@ async def select_team(ctx, user, team_list):
             e.clear_fields()
             e.add_field(name='Timed Out', value='Team selection timed out after 60 seconds.\nTry again.')
             await msg.edit(embed=e)
-            cache.delete('select_team', msg.id)
+            utils.cache.delete('select_team', msg.id)
             return None
     return selected_team
