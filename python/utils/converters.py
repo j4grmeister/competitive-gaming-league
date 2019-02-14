@@ -36,7 +36,7 @@ class CGL_Team(commands.RoleConverter):
         team = None
         try:
             role = await super().convert(ctx, argument)
-            database.execute(f"SELECT team_id FROM json_each(SELECT teams FROM server_table WHERE server_id={ctx.guild.id}) AS (team_id KEY, role_id TEXT) WHERE role_id={role};")
+            database.execute(f"SELECT team_id FROM (SELECT json_each(teams) FROM server_table WHERE server_id={ctx.guild.id}) AS (team_id KEY, role_id TEXT) WHERE role_id={role};")
             team, = database.fetchone()
             if team == None:
                 await ctx.send("That team doesn't exist")
