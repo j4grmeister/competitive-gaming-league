@@ -3,6 +3,7 @@ import discord
 from python.utils import database
 from python.utils import cache
 from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
@@ -43,5 +44,5 @@ class CGL_Team(commands.RoleConverter):
         msg = await ctx.send("react")
         cache.add('test', msg.id, done)
         while(not finished):
-            pass
+            await asyncio.sleep(1)
         return 'success'
