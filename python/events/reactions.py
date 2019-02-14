@@ -254,12 +254,3 @@ async def invite_to_team(bot, reaction, user):
     utils.cache.delete('invite_to_team_message', msg.id)
     await msg.delete()
     return True
-
-async def test(bot, reaction, user):
-    print('reaction')
-    msg = reaction.message
-    done = utils.cache.get('test', msg.id)
-    if done == None:
-        return False
-    done()
-    return True
