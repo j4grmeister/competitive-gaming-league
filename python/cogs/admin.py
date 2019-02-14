@@ -20,7 +20,7 @@ class Admin():
         if award == "":
             await ctx.send("No award was specified.")
             return
-        utils.database.execute(f"UPDATE player_table SET awards=awards::jsonb || '{{ \"{ctx.guild.id}\": [\"{award}\"] }}' WHERE discord_id={player.id};")
+        utils.database.execute(f"UPDATE player_table SET awards=jsonb_set(awards::jsonb, array['{ctx.guild.id}'], (awards->'{ctx.guild.id}')::jsonb || '[\"{award}\"]' WHERE discord_id={player.id};")
         utils.database.commit()
         await ctx.send("That player has been awarded.")
 
