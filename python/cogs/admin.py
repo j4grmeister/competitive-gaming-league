@@ -10,14 +10,15 @@ class Admin():
     @commands.group(pass_context=True)
     async def award(self, ctx):
         """Commands for managing player/team awards."""
-        await ctx.send("See **!help award** for proper usage.")
+        if ctx.invoked_subcommand == None:
+            await ctx.send("See **!help award** for proper usage.")
 
     @award.command(pass_context=True)
     async def player(self, ctx, player: utils.converters.CGL_User, *, award):
         """Award a player."""
         if player == None:
             return
-        if award == "":
+        if award == None:
             await ctx.send("No award was specified.")
             return
         utils.database.execute(f"UPDATE player_table SET awards=jsonb_set(awards::jsonb, array['{ctx.guild.id}'], (awards->'{ctx.guild.id}')::jsonb || '[\"{award}\"]') WHERE discord_id={player.id};")

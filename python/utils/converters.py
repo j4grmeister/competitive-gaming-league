@@ -1,6 +1,8 @@
 from discord.ext import commands
 import discord
 from python.utils import database
+from python.utils import cache
+from concurrent.futures import ThreadPoolExecutor
 
 class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
@@ -8,12 +10,9 @@ class CGL_User(commands.UserConverter):
         user = None
         try:
             user = await super().convert(ctx, argument)
-        except:
-            pass
-        if user == None:
-            database.execute(f"SELECT elo, discord_id FROM player_table WHERE lower(username)='{argument.lower()}';")
-        else:
             database.execute(f"SELECT elo, discord_id FROM player_table WHERE discord_id={user.id};")
+        except:
+            database.execute(f"SELECT elo, discord_id FROM player_table WHERE lower(username)='{argument.lower()}';")
         elo, discordid = database.fetchone()
         if elo == None:
             if user == None:
@@ -28,3 +27,21 @@ class CGL_User(commands.UserConverter):
         if user == None:
             return ctx.bot.get_user(discordid)
         return user
+
+class CGL_Team(commands.RoleConverter):
+    async def convert(self, ctx, argument):
+        #convert this into a team id, or None if it doesn't exist
+        #team = None
+        #try:
+        #    team = await super().convert(ctx, argument)
+        #    database.execute(f"SELECT team_id FROM team_table WHERE )
+        #except:
+        #    database.execute(f"SELECT )
+        finished = False
+        def done():
+            finished = True
+        msg = await ctx.send("react")
+        cache.add('test', msg.id, done)
+        while(not finished):
+            pass
+        return 'success'

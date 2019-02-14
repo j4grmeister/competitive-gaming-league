@@ -44,5 +44,9 @@ class Stats:
             e.add_field(name='Awards', value=awards_str)
         await ctx.send(embed=e)
 
+    @commands.command(pass_context=True)
+    async def teaminfo(self, ctx, team: utils.converters.CGL_Team):
+        await ctx.send(team)
+
 def setup(bot):
     bot.add_cog(Stats(bot))

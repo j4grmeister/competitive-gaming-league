@@ -218,10 +218,12 @@ async def team_invite(bot, reaction, user):
 async def invite_to_team(bot, reaction, user):
     msg = reaction.message
     cached_data = utils.cache.get('invite_to_team_message', msg.id)
+    if cached_data == None:
+        return False
     target_user = cached_data['user']
-    author = cached_data['author']
     if author.id != user.id:
         return True
+    author = cached_data['author']
     owned_teams = cached_data['owned_teams']
     owned_team = None
     if reaction.emoji in utils.emoji_list:
@@ -252,4 +254,12 @@ async def invite_to_team(bot, reaction, user):
     await msg.channel.send(f"{username} has been invited to {team_name}.")
     utils.cache.delete('invite_to_team_message', msg.id)
     await msg.delete()
+    return True
+
+async def test(bot, reaction, user):
+    msg = reaction.message
+    done = utils.cache.get('test', msg.id)
+    if done == None:
+        return False
+    done()
     return True
