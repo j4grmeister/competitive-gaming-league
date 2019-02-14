@@ -36,20 +36,22 @@ class CGL_Team(commands.RoleConverter):
         team = None
         try:
             role = await super().convert(ctx, argument)
-            database.execute(f"SELECT team_id FROM (SELECT json_each(teams) FROM server_table WHERE server_id={ctx.guild.id}) AS (team_id KEY, role_id TEXT) WHERE role_id={role};")
-            team, = database.fetchone()
-            if team == None:
-                await ctx.send("That team doesn't exist")
-                return None
-        except:
-            database.execute(f"SELECT team_id FROM team_table WHERE lower(team_name)='{argument.lower()}';")
-            allteams = database.fetchall()
-            if allteams == None:
-                await ctx.send("That team doesn't exist")
-                return None
-            for i in range(len(allteams)):
-                allteams[i] = allteams[i][0]
-                team = teams.select_team(allteams)
+            if role != None:
+                database.execute(f"SELECT team_id FROM (SELECT json_each(teams) FROM server_table WHERE server_id={ctx.guild.id}) AS (team_id KEY, role_id TEXT) WHERE role_id={role};")
+                team, = database.fetchone()
                 if team == None:
+                    await ctx.send("That team doesn't exist")
                     return None
+        except:
+            pass
+        database.execute(f"SELECT team_id FROM team_table WHERE lower(team_name)='{argument.lower()}';")
+        allteams = database.fetchall()
+        if allteams == None:
+            await ctx.send("That team doesn't exist")
+            return None
+        for i in range(len(allteams)):
+            allteams[i] = allteams[i][0]
+            team = teams.select_team(allteams)
+            if team == None:
+                return None
         return team

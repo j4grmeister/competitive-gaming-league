@@ -45,7 +45,7 @@ class Stats:
         await ctx.send(embed=e)
 
     @commands.command(pass_context=True)
-    async def teaminfo(self, ctx, team: utils.converters.CGL_Team):
+    async def teaminfo(self, ctx, *, team: utils.converters.CGL_Team):
         await ctx.send(team)
 
 def setup(bot):
