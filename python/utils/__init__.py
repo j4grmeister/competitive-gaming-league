@@ -2,7 +2,6 @@ import python.utils.cache
 import python.utils.checks
 import python.utils.config
 import python.utils.database
-import python.utils.guilds
 import python.utils.security
 import python.utils.teams
 import python.utils.users
