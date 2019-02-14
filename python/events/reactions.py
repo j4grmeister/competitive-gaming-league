@@ -257,6 +257,7 @@ async def invite_to_team(bot, reaction, user):
     return True
 
 async def test(bot, reaction, user):
+    print('reaction')
     msg = reaction.message
     done = utils.cache.get('test', msg.id)
     if done == None:
