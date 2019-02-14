@@ -40,6 +40,7 @@ class CGL_Team(commands.RoleConverter):
         #    database.execute(f"SELECT )
         finished = False
         def done():
+            nonlocal finished
             finished = True
         msg = await ctx.send("react")
         cache.add('test', msg.id, done)
