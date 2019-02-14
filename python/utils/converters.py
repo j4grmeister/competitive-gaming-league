@@ -8,6 +8,8 @@ class CGL_User(commands.UserConverter):
         user = None
         try:
             user = await super().convert(ctx, argument)
+        except:
+            pass
         if user == None:
             database.execute(f"SELECT elo, discord_id FROM player_table WHERE lower(username)='{argument.lower()}';")
         else:
