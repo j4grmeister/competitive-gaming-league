@@ -9,9 +9,9 @@ extensions = [
     'python.cogs.general',
     'python.cogs.teams',
     'python.cogs.stats',
+    'python.cogs.admin',
     'python.cogs.owner',
     'python.events.events',
-    'python.utils.guilds',
     'python.events.events'
 ]
 

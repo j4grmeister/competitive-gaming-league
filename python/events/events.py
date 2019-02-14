@@ -41,7 +41,8 @@ class Events:
             for g in games:
                 p_elo[f"{guild.id}"][g] = default_elo
             utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb | '{json.dumps(p_elo)}'::jsonb WHERE discord_id={member.id};")
-            utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{{{guild.id}: []}}'::jsonb WHERE discord_id={member.id};")
+            utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id={member.id};")
+            utils.database.execute(f"UPDATE player_table SET awards=awards::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id={member.id};")
             if force:
                 await member.edit(nick=utils.database.player_setting(member.id, 'username'))
             if roles:

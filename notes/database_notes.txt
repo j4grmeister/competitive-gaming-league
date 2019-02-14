@@ -20,7 +20,7 @@ username TEXT
 elo JSON DEFAULT '{}' {'serverid': {'game': elo}}
 #steam_id TEXT
 teams JSON DEFAULT '{}' {'game': teamid}
-#awards JSON DEFAULT '{}' {'serverid': ["award"]}
+awards JSON DEFAULT '{}' {'serverid': ["award"]}
 region TEXT
 server_roles JSON DEFAULT '{}' {'serverid': [roleid]}
 
