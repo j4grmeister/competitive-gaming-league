@@ -45,4 +45,5 @@ class CGL_Team(commands.RoleConverter):
         cache.add('test', msg.id, done)
         while(not finished):
             await asyncio.sleep(1)
+            print(finished)
         return 'success'
