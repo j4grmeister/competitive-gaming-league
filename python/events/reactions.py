@@ -4,7 +4,6 @@ from python import utils
 import json
 
 async def set_region(bot, reaction, user):
-    print('set region')
     msg = reaction.message
     target_userid = utils.cache.get('set_region_message', msg.id)
     if target_userid == None:
