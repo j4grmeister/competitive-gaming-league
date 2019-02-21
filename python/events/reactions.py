@@ -17,9 +17,9 @@ async def set_region(bot, reaction, user):
         member_region = "EU"
     else:
         return True
-    utils.database.execute(f"UPDATE player_table SET region='{member_region}' WHERE discord_id={target_userid};")
+    utils.database.execute(f"UPDATE players SET region='{member_region}' WHERE discord_id={target_userid};")
     #grant region roles in all servers
-    utils.database.execute(f"SELECT server_id, region_roles -> '{member_region}' FROM server_table WHERE region_roles_enabled=TRUE;")
+    utils.database.execute(f"SELECT server_id, region_roles -> '{member_region}' FROM servers WHERE region_roles_enabled=TRUE;")
     serverlist = utils.database.fetchall()
     for sid, role in serverlist:
         guild = bot.get_guild(sid)
@@ -43,7 +43,7 @@ async def get_roles(bot, reaction, user):
         return True
     server_roles = json.loads(utils.database.server_setting(msg.channel.guild.id, 'requestable_roles'))
     #not sure if this little bit works
-    utils.database.execute(f"SELECT server_roles -> '{guild.id}' FROM player_table WHERE discord_id={user.id};")
+    utils.database.execute(f"SELECT server_roles -> '{guild.id}' FROM players WHERE discord_id={user.id};")
     member_roles = json.loads(utils.database.fetchone()[0])
     #end of uncertainty
     allreactions = msg.reactions
@@ -86,7 +86,7 @@ async def create_team(bot, reaction, user):
         return True
     team_name = cached_data['team_name']
     #check that the player isnt already on a team for this server's game
-    utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={target_userid};")
+    utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id={target_userid};")
     player_team = utils.database.fetchone()[0]
     if player_team != None:
         await msg.channel.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
@@ -97,15 +97,14 @@ async def create_team(bot, reaction, user):
     eteam_name = utils.security.escape_sql(team_name)
     #get all the servers that the player is in that have this game as their primary game
     #create team roles as well
-    team_elo = {}
-    utils.database.execute(f"SELECT server_id, team_roles_enabled, default_role, hoist_roles, mention_roles FROM server_table WHERE '{game}'=ANY(games);")
+    utils.database.execute(f"SELECT server_id, team_roles_enabled, default_role, hoist_roles, mention_roles FROM servers WHERE '{game}'=ANY(games);")
     allservers = utils.database.fetchall()
     for sid, team_roles_enabled, default_role, hoist_roles, mention_roles in allservers:
         guild = bot.get_guild(sid)
         member = guild.get_member(target_userid)
         if member != None:
-            utils.database.execute(f"SELECT elo -> '{guild.id}' -> '{game}' FROM player_table WHERE discord_id={target_userid};")
-            team_elo[f"{sid}"] = utils.database.fetchone()[0]
+            utils.database.execute(f"SELECT elo -> '{guild.id}' -> '{game}' FROM players WHERE discord_id={target_userid};")
+            team_elo = utils.database.fetchone()[0]
             troleid = '0' #0 means no role
             if team_roles_enabled:
                 drole = guild.get_role(default_role)
@@ -113,11 +112,11 @@ async def create_team(bot, reaction, user):
                 trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                 await member.add_roles(trole)
                 troleid = trole.id
-            utils.database.execute(f"UPDATE server_table SET teams=teams::jsonb || '{{\"{teamid}\": {troleid}}}'::jsonb WHERE server_id={sid};")
+            utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
     #create the team's database entry
-    utils.database.execute(f"INSERT INTO team_table (owner_id, team_id, game, team_name, team_elo, primary_players) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{json.dumps(team_elo)}', '{{{target_userid}}}');")
+    utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ({target_userid}, {teamid}, '{game}', '{eteam_name}', '{{{target_userid}}}');")
     #add the user to the team
-    utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={target_userid};")
+    utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={target_userid};")
     #commit changes
     utils.database.commit()
     utils.cache.delete('create_team_message', msg.id)
@@ -146,7 +145,7 @@ async def change_team_name(bot, reaction, user):
         return True
     team_name = cached_data['team_name']
 
-    utils.database.execute("SELECT server_id, teams FROM server_table WHERE team_roles_enabled=TRUE;")
+    utils.database.execute("SELECT server_id, teams FROM servers WHERE team_roles_enabled=TRUE;")
     allservers = utils.database.fetchall()
     for sid, teams_json in allservers:
         teams = json.loads(teams_json)
@@ -155,7 +154,7 @@ async def change_team_name(bot, reaction, user):
             role = guild.get_role(teams[owned_team])
             await role.edit(name=team_name)
     eteam_name = utils.security.escape_sql(team_name)
-    utils.database.execute(f"UPDATE team_table SET team_name='{eteam_name}' WHERE team_id={owned_team};")
+    utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id={owned_team};")
     utils.database.commit()
     utils.cache.delete('change_team_name_message', msg.id)
     await msg.delete()
@@ -173,7 +172,7 @@ async def team_invite(bot, reaction, user):
     if reaction.emoji == utils.emoji_confirm:
         game = utils.teams.team_game(team_id)
         #check that the player is not already on a team for this game
-        utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={user.id};")
+        utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id={user.id};")
         player_team = utils.database.fetchone()[0]
         if player_team != None:
             await msg.delete()
@@ -185,28 +184,27 @@ async def team_invite(bot, reaction, user):
         subs = len(utils.teams.substitute_players(team_id))
         teamsize = primary + subs
         is_primary = (primary + 1 <= max_primary)
-        utils.database.execute(f"UPDATE player_table SET teams=teams::jsonb || '{{\"{game}\": {team_id}}}'::jsonb WHERE discord_id={user.id};")
+        utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{\"{game}\": {team_id}}}'::jsonb WHERE discord_id={user.id};")
         #TODO: iterate through servers with the team in them instead of iterating through servers the team has an elo setting for
-        team_elo = utils.teams.team_elo(team_id)
-        player_elo = utils.users.player_elo(user.id)
-        for server in team_elo:
-            before_elo = team_elo[server]
-            utils.database.execute(f"SELECT default_elo, games FROM server_table WHERE server_id={server};")
+        utils.database.execute(f"SELECT server_id, team_elo FROM server_teams WHERE team_id={team_id};")
+        servers = utils.database.fetchall()
+        for server_id, before_elo in allservers:
+            utils.database.execute(f"SELECT default_elo, games FROM servers WHERE server_id={server_id};")
             p_elo, games = utils.database.fetchone()
-            if server in player_elo:
-                p_elo = player_elo[f"{server}"][game]
+            utils.database.execute(f"SELECT discord_id FROM server_players WHERE server_id={server_id};")
+            if utils.database.fetchone() != None:
+                utils.database.execute(f"SELECT elo FROM server_players WHERE server_id={server_id} AND discord_id={user.id} AND game='{game}';")
+                p_elo, = utils.database.fetchone()
             else:
                 #TODO: turn this into a single SQL query
-                ejson = {f"{server}": {}}
                 for g in games:
-                    ejson[f"{server}"][g] = p_elo
-                utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(ejson)}'::jsonb WHERE discord_id={user.id};")
+                    utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ({user.id}, {server_id}, '{g}', {p_elo});")
             after_elo = (before_elo * teamsize + p_elo) / teamsize + 1
             team_elo[server] = after_elo
         if is_primary:
-            utils.database.execute(f"UPDATE team_table SET primary_players=array_append(primary_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
+            utils.database.execute(f"UPDATE teams SET primary_players=array_append(primary_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
         else:
-            utils.database.execute(f"UPDATE team_table SET substitute_players=array_append(substitute_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
+            utils.database.execute(f"UPDATE teams SET substitute_players=array_append(substitute_players, {user.id}), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id={team_id};")
         utils.database.commit()
         await msg.delete()
         utils.cache.delete('team_invite_message', msg.id)
@@ -236,7 +234,7 @@ async def invite_to_team(bot, reaction, user):
         return True
     #check that the player is not already on a team for this game
     game = utils.teams.team_game(owned_teams[0])
-    utils.database.execute(f"SELECT teams -> '{game}' FROM player_table WHERE discord_id={target_user.id};")
+    utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id={target_user.id};")
     player_team = utils.database.fetchone()[0]
     if player_team != None:
         await msg.delete()

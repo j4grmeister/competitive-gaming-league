@@ -1,4 +1,4 @@
-SERVER_TABLE:
+SERVERS:
 server_id BIGINT
 owner_id BIGINT
 requestable_roles JSON DEFAULT '{}' {'rolename': roleid}
@@ -7,28 +7,40 @@ elo_k_factor INTEGER DEFAULT 64
 force_usernames BOOLEAN DEFAULT FALSE
 team_roles_enabled BOOLEAN DEFAULT FALSE
 default_role BIGINT
-teams JSON DEFAULT '{}' {'teamid': roleid(or none)}
+*teams JSON DEFAULT '{}' {'teamid': roleid(or none)}
 region_roles_enabled BOOLEAN DEFAULT FALSE
 region_roles JSON DEFAULT '{}' {'region': roleid}
 games TEXT[] DEFAULT '{"csgo"}'
 hoist_roles BOOLEAN DEFAULT FALSE
 mention_roles BOOLEAN DEFAULT TRUE
 
-PLAYER_TABLE:
+PLAYERS:
 discord_id BIGINT
 username TEXT
-elo JSON DEFAULT '{}' {'serverid': {'game': elo}}
+*elo JSON DEFAULT '{}' {'serverid': {'game': elo}}
 #steam_id TEXT
 teams JSON DEFAULT '{}' {'game': teamid}
 awards JSON DEFAULT '{}' {'serverid': ["award"]}
 region TEXT
 server_roles JSON DEFAULT '{}' {'serverid': [roleid]}
 
-TEAM_TABLE:
+TEAMS:
 team_id BIGINT
 team_name TEXT
-team_elo JSON DEFAULT '{}' {serverid: teamelo}
+*team_elo JSON DEFAULT '{}' {serverid: teamelo}
 game TEXT
 primary_players BIGINT[] DEFAULT '{}'
 substitute_players BIGINT[] DEFAULT '{}'
 owner_id BIGINT
+
+SERVER_TEAMS:
+team_id BIGINT
+server_id BIGINT
+team_elo INT
+role_id BIGINT
+
+SERVER_PLAYERS:
+discord_id BIGINT
+server_id BIGINT
+game TEXT
+elo INT

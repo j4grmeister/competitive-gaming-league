@@ -26,17 +26,17 @@ class General:
         #escape single quotes to prevent SQL injection
         eusername = utils.security.escape_sql(username)
         #check that the username is available
-        utils.database.execute(f"SELECT discord_id FROM player_table WHERE lower(username)='{eusername.lower()}';")
+        utils.database.execute(f"SELECT discord_id FROM players WHERE lower(username)='{eusername.lower()}';")
         if utils.database.fetchone() != None:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
         #enter the user in the database
-        utils.database.execute(f"INSERT INTO player_table (discord_id, username) values ({ctx.author.id}, '{eusername}');")
+        utils.database.execute(f"INSERT INTO players (discord_id, username) values ({ctx.author.id}, '{eusername}');")
         #apply server settings in all servers
         default_elo = {}
         server_roles = {}
         awards = {}
-        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, games FROM server_table;")
+        utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, games FROM servers;")
         serverlist = utils.database.fetchall()
         for sid, force, roles, games in serverlist:
             guild = self.bot.get_guild(sid)
@@ -44,14 +44,14 @@ class General:
             if member != None:
                 default_elo[f"{sid}"] = {}
                 for g in games:
-                    default_elo[f"{sid}"][g] = utils.database.server_setting(sid, 'default_elo')
+                    delo = utils.database.server_setting(sid, 'default_elo')
+                    utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ({ctx.author.id}, {sid}, '{g}', {delo});")
                 if force:
                     if member.id != guild.owner.id:
                         await member.edit(nick=username)
                 if roles:
                     await member.add_roles(guild.get_role(utils.database.server_setting(sid, 'default_role')))
-        utils.database.execute(f"UPDATE player_table SET elo=elo::jsonb || '{json.dumps(default_elo)}'::jsonb WHERE discord_id={ctx.author.id};")
-        utils.database.execute(f"UPDATE player_table SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id={ctx.author.id};")
         #commit changes
         utils.database.commit()
         #notify the user that they have successfully registered
@@ -74,14 +74,14 @@ class General:
         #escape single quotes to prevent SQL injection
         eusername = utils.security.escape_sql(username)
         #check that the username is available
-        utils.database.execute(f"SELECT discord_id FROM player_table WHERE lower(username)='{eusername.lower()}';")
+        utils.database.execute(f"SELECT discord_id FROM players WHERE lower(username)='{eusername.lower()}';")
         if utils.database.fetchone() != None:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
         #update the database
-        utils.database.execute(f"UPDATE player_table SET username='{eusername}' WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE players SET username='{eusername}' WHERE discord_id={ctx.author.id};")
         #update nickname in all servers
-        utils.database.execute("SELECT server_id FROM server_table WHERE force_usernames=TRUE;")
+        utils.database.execute("SELECT server_id FROM servers WHERE force_usernames=TRUE;")
         serverlist = utils.database.fetchall()
         for sid, in serverlist:
             member = self.bot.get_guild(sid).get_member(ctx.author.id)

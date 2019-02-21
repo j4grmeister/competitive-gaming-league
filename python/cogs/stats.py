@@ -11,8 +11,9 @@ class Stats:
         if player == None:
             return
         #get player data
-        utils.database.execute(f"SELECT username, elo -> '{ctx.guild.id}', teams, server_roles -> '{ctx.guild.id}', awards -> '{ctx.guild.id}' FROM player_table WHERE discord_id={player.id};")
+        utils.database.execute(f"SELECT username, teams, server_roles -> '{ctx.guild.id}', awards -> '{ctx.guild.id}' FROM players WHERE discord_id={player.id};")
         username, elo, teams, roles, awards = utils.database.fetchone()
+        utils.database
         e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
         #elo and teams
         elo_str = ""
@@ -20,7 +21,7 @@ class Stats:
         for game in elo:
             elo_str += f"**{game}:** {elo[game]}\n"
             if game in teams:
-                utils.database.execute(f"SELECT team_name FROM team_table WHERE team_id={teams[game]}")
+                utils.database.execute(f"SELECT team_name FROM teams WHERE team_id={teams[game]}")
                 teamname, = utils.database.fetchone()
                 teams_str += f"**{game}:** {teamname}\n"
         elo_str = elo_str[:-1]
