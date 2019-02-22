@@ -15,8 +15,8 @@ class Stats:
         username, teams, roles, awards = utils.database.fetchone()
         utils.database.execute(f"SELECT game, elo FROM server_players WHERE server_id={ctx.guild.id} AND discord_id={player.id};")
         allelo = utils.database.fetchall()
-        e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue(), image=player.avatar_url)
-        print(player.avatar_url)
+        e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
+        e.set_image(url=player.avatar_url)
         #elo and teams
         elo_str = ""
         teams_str = ""
