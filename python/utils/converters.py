@@ -10,12 +10,16 @@ class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
         #convert this to a Discord user and check that they are registered
         user = None
+        discordid = None
         try:
             user = await super().convert(ctx, argument)
-            database.execute(f"SELECT elo, discord_id FROM players WHERE discord_id={user.id};")
+            discordid = user.id
+            database.execute(f"SELECT elo FROM server_players WHERE discord_id={discordid};")
         except:
-            database.execute(f"SELECT elo, discord_id FROM players WHERE lower(username)='{argument.lower()}';")
-        elo, discordid = database.fetchone()
+            database.execute(f"SELECT discord_id FROM players WHERE lower(username)='{argument.lower()}';")
+            discordid, = database.fetchone()
+            database.execute(f"SELECT elo FROM server_players WHERE server_id={ctx.guild.id} AND discord_id={discordid};")
+        elo = database.fetchone()
         if elo == None:
             if user == None:
                 await ctx.send("That user doesn't exist.")
