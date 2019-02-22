@@ -41,6 +41,7 @@ class General:
         for sid, force, roles, games in serverlist:
             guild = self.bot.get_guild(sid)
             member = guild.get_member(ctx.author.id)
+            server_roles[f"{ctx.guild.id}"] = []
             if member != None:
                 default_elo[f"{sid}"] = {}
                 for g in games:
