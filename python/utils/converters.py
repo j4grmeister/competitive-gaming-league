@@ -19,17 +19,17 @@ class CGL_User(commands.UserConverter):
             database.execute(f"SELECT discord_id FROM players WHERE lower(username)='{argument.lower()}';")
             discordid, = database.fetchone()
             database.execute(f"SELECT elo FROM server_players WHERE server_id={ctx.guild.id} AND discord_id={discordid};")
-        elo = database.fetchone()
-        if elo == None:
+        elo, = database.fetchone()
+        if discordid == None:
             if user == None:
                 await ctx.send("That user doesn't exist.")
             else:
                 await ctx.send("That user is not registered.\nSee **!help register** for more details.")
             return None
-        #check that the user is a member of this server
-        if f"{ctx.guild.id}" not in elo:
-            await ctx.send("That user is not a member of this server.")
-            return None
+        else:
+            if elo == None:
+                await ctx.send("That user is not a member of this server.")
+                return None
         if user == None:
             return ctx.bot.get_user(discordid)
         return user
