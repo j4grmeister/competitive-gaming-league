@@ -103,7 +103,7 @@ async def create_team(bot, reaction, user):
         guild = bot.get_guild(sid)
         member = guild.get_member(target_userid)
         if member != None:
-            utils.database.execute(f"SELECT elo -> '{guild.id}' -> '{game}' FROM players WHERE discord_id={target_userid};")
+            utils.database.execute(f"SELECT elo FROM server_players WHERE game='{game}' AND server_id={sid} AND discord_id={target_userid};")
             team_elo = utils.database.fetchone()[0]
             troleid = '0' #0 means no role
             if team_roles_enabled:
