@@ -52,7 +52,7 @@ class Teams:
                     print(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
                     utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
             #create the team's database entry
-            utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name primary_players) VALUES ({ctx.author.id}, {teamid}, '{guild_games[0]}', '{eteam_name}', '{{{ctx.author.id}}}');")
+            utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ({ctx.author.id}, {teamid}, '{guild_games[0]}', '{eteam_name}', '{{{ctx.author.id}}}');")
             #add the user to the team
             utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={ctx.author.id};")
             #commit changes
