@@ -42,7 +42,7 @@ class Teams:
                 if member != None:
                     utils.database.execute(f"SELECT elo FROM server_players WHERE game='{guild_games[0]}' AND server_id={ctx.guild.id} AND discord_id={ctx.author.id};")
                     team_elo = utils.database.fetchone()[0]
-                    troleid = 'NULL' #0 means no role
+                    troleid = '0' #0 means no role
                     if team_roles_enabled:
                         drole = guild.get_role(default_role)
                         await member.remove_roles(drole)
