@@ -49,7 +49,6 @@ class Teams:
                         trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                         await member.add_roles(trole)
                         troleid = trole.id
-                    print(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
                     utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
             #create the team's database entry
             utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ({ctx.author.id}, {teamid}, '{guild_games[0]}', '{eteam_name}', '{{{ctx.author.id}}}');")
