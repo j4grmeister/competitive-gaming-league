@@ -31,6 +31,8 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+    listen_act = discord.Activity(name='!help', type=discord.ActivityType.listening)
+    bot.change_presence(activity=)
     bot.appinfo = await bot.application_info()
 
 token = os.environ['DISCORD_TOKEN']
