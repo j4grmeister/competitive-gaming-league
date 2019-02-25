@@ -55,7 +55,7 @@ class CGL_Team(commands.RoleConverter):
             return None
         for i in range(len(allteams)):
             allteams[i] = allteams[i][0]
-            team = teams.select_team(ctx, ctx.author, allteams)
+            team = await teams.select_team(ctx, ctx.author, allteams)
             if team == None:
                 return None
         return team
