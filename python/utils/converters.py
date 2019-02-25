@@ -53,9 +53,5 @@ class CGL_Team(commands.RoleConverter):
         if allteams == None:
             await ctx.send("That team doesn't exist")
             return None
-        for i in range(len(allteams)):
-            allteams[i] = allteams[i][0]
-            team = await teams.select_team(ctx, ctx.author, allteams)
-            if team == None:
-                return None
+        team = await teams.select_team(ctx, ctx.author, allteams)
         return team
