@@ -31,7 +31,7 @@ class General:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
         #enter the user in the database
-        utils.database.execute(f"INSERT INTO players (discord_id, username) values ({ctx.author.id}, '{eusername}');")
+        utils.database.execute(f"INSERT INTO players (discord_id, username) values ('{ctx.author.id}', '{eusername}');")
         #apply server settings in all servers
         default_elo = {}
         server_roles = {}
@@ -45,13 +45,13 @@ class General:
                 server_roles[f"{sid}"] = []
                 for g in games:
                     delo = utils.database.server_setting(sid, 'default_elo')
-                    utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ({ctx.author.id}, {sid}, '{g}', {delo});")
+                    utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ('{ctx.author.id}', '{sid}', '{g}', {delo});")
                 if force:
                     if member.id != guild.owner.id:
                         await member.edit(nick=username)
                 if roles:
                     await member.add_roles(guild.get_role(utils.database.server_setting(sid, 'default_role')))
-        utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb, awards=awards::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb, awards=awards::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id='{ctx.author.id}';")
         #commit changes
         utils.database.commit()
         #notify the user that they have successfully registered
@@ -79,7 +79,7 @@ class General:
             await ctx.send("That username is already taken. Please try again with a different one.")
             return
         #update the database
-        utils.database.execute(f"UPDATE players SET username='{eusername}' WHERE discord_id={ctx.author.id};")
+        utils.database.execute(f"UPDATE players SET username='{eusername}' WHERE discord_id='{ctx.author.id}';")
         #update nickname in all servers
         utils.database.execute("SELECT server_id FROM servers WHERE force_usernames=TRUE;")
         serverlist = utils.database.fetchall()

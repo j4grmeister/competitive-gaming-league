@@ -1,6 +1,6 @@
 SERVERS:
-server_id BIGINT
-owner_id BIGINT
+server_id TEXT
+owner_id TEXT
 requestable_roles JSON DEFAULT '{}' {'rolename': roleid}
 default_elo INTEGER DEFAULT 1300
 elo_k_factor INTEGER DEFAULT 64
@@ -15,7 +15,7 @@ hoist_roles BOOLEAN DEFAULT FALSE
 mention_roles BOOLEAN DEFAULT TRUE
 
 PLAYERS:
-discord_id BIGINT
+discord_id TEXT
 username TEXT
 *elo JSON DEFAULT '{}' {'serverid': {'game': elo}}
 #steam_id TEXT
@@ -25,22 +25,22 @@ region TEXT
 server_roles JSON DEFAULT '{}' {'serverid': [roleid]}
 
 TEAMS:
-team_id BIGINT
+team_id TEXT
 team_name TEXT
 *team_elo JSON DEFAULT '{}' {serverid: teamelo}
 game TEXT
-primary_players BIGINT[] DEFAULT '{}'
-substitute_players BIGINT[] DEFAULT '{}'
-owner_id BIGINT
+primary_players TEXT[] DEFAULT '{}'
+substitute_players TEXT[] DEFAULT '{}'
+owner_id TEXT
 
 SERVER_TEAMS:
-team_id BIGINT
-server_id BIGINT
+team_id TEXT
+server_id TEXT
 team_elo INT
-role_id BIGINT
+role_id TEXT
 
 SERVER_PLAYERS:
-discord_id BIGINT
-server_id BIGINT
+discord_id TEXT
+server_id TEXT
 game TEXT
 elo INT

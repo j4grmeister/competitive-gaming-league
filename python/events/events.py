@@ -25,22 +25,22 @@ class Events:
                     break
 
     async def on_guild_join(self, guild):
-        utils.database.execute(f"INSERT INTO servers (server_id) VALUES ({guild.id});")
+        utils.database.execute(f"INSERT INTO servers (server_id) VALUES ('{guild.id}');")
         utils.database.commit()
 
     async def on_member_join(self, member):
         guild = member.guild
         #register the member in this league if they are registered with cgl
-        utils.database.execute(f"SELECT * FROM players WHERE discord_id={member.id};")
+        utils.database.execute(f"SELECT * FROM players WHERE discord_id='{member.id}';")
         if utils.database.fetchone() != None:
-            utils.database.execute(f"SELECT default_elo, force_usernames, team_roles_enabled, region_roles_enabled, games FROM servers WHERE server_id={guild.id};")
+            utils.database.execute(f"SELECT default_elo, force_usernames, team_roles_enabled, region_roles_enabled, games FROM servers WHERE server_id='{guild.id}';")
             default_elo, force, roles, region, games = utils.database.fetchone()
             p_elo = {f"{guild.id}": {}}
             for g in games:
                 p_elo[f"{guild.id}"][g] = default_elo
-            utils.database.execute(f"UPDATE players SET elo=elo::jsonb | '{json.dumps(p_elo)}'::jsonb WHERE discord_id={member.id};")
-            utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id={member.id};")
-            utils.database.execute(f"UPDATE players SET awards=awards::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id={member.id};")
+            utils.database.execute(f"UPDATE players SET elo=elo::jsonb | '{json.dumps(p_elo)}'::jsonb WHERE discord_id='{member.id}';")
+            utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id='{member.id}';")
+            utils.database.execute(f"UPDATE players SET awards=awards::jsonb || '{{ \"{guild.id}\": []}}'::jsonb WHERE discord_id='{member.id}';")
             if force:
                 await member.edit(nick=utils.database.player_setting(member.id, 'username'))
             if roles:
@@ -50,7 +50,7 @@ class Events:
                 #TODO: add/create team role if player is on a team
             if region:
                 member_region = utils.database.player_setting(member.id, 'region')
-                utils.database.execute(f"SELECT region_roles -> '{member_region}' from servers WHERE server_id={guild.id};")
+                utils.database.execute(f"SELECT region_roles -> '{member_region}' from servers WHERE server_id='{guild.id}';")
                 region_role = utils.database.fetchone()[0]
                 await member.add_roles(guild.get_role(region_role))
             utils.database.commit()

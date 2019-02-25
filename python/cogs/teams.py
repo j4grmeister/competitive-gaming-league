@@ -23,7 +23,7 @@ class Teams:
         #continue creating the team
         if len(guild_games) == 1:
             #check that the player isnt already on a team for this server's game
-            utils.database.execute(f"SELECT teams -> '{guild_games[0]}' FROM players WHERE discord_id={ctx.author.id};")
+            utils.database.execute(f"SELECT teams -> '{guild_games[0]}' FROM players WHERE discord_id='{ctx.author.id}';")
             player_team = utils.database.fetchone()[0]
             if player_team != None:
                 await ctx.send(f"You are already on a {guild_games[0]} team.\nYou cannot be on more than one team per game.")
@@ -40,7 +40,7 @@ class Teams:
                 guild = self.bot.get_guild(sid)
                 member = guild.get_member(ctx.author.id)
                 if member != None:
-                    utils.database.execute(f"SELECT elo FROM server_players WHERE game='{guild_games[0]}' AND server_id={ctx.guild.id} AND discord_id={ctx.author.id};")
+                    utils.database.execute(f"SELECT elo FROM server_players WHERE game='{guild_games[0]}' AND server_id='{ctx.guild.id}' AND discord_id='{ctx.author.id}';")
                     team_elo = utils.database.fetchone()[0]
                     troleid = '0' #0 means no role
                     if team_roles_enabled:
@@ -49,12 +49,12 @@ class Teams:
                         trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                         await member.add_roles(trole)
                         troleid = trole.id
-                    print(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
-                    utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ({guild.id}, {teamid}, {team_elo}, {troleid});")
+                    print(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}');")
+                    utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}');")
             #create the team's database entry
-            utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ({ctx.author.id}, {teamid}, '{guild_games[0]}', '{eteam_name}', '{{{ctx.author.id}}}');")
+            utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ('{ctx.author.id}', '{teamid}', '{guild_games[0]}', '{eteam_name}', '{{ \"{ctx.author.id}\" }}');")
             #add the user to the team
-            utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{\"{guild_games[0]}\": {teamid}}}'::jsonb WHERE discord_id={ctx.author.id};")
+            utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{ \"{guild_games[0]}\": \"{teamid}\" }}'::jsonb WHERE discord_id='{ctx.author.id}';")
             #commit changes
             utils.database.commit()
             await ctx.send("Your team has been created.")
@@ -90,7 +90,7 @@ class Teams:
                     role = guild.get_role(teams[owned_teams[0]])
                     await role.edit(name=team_name)
             eteam_name = utils.security.escape_sql(team_name)
-            utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id={owned_teams[0]};")
+            utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id='{owned_teams[0]}';")
             utils.database.commit()
             await ctx.send("Your team name has been changed.")
         else:
@@ -100,7 +100,7 @@ class Teams:
             for team in owned_teams:
                 if len(teamlist) > 0:
                     teamlist += '\n'
-                utils.database.execute(f"SELECT team_name, game FROM teams WHERE team_id={team};")
+                utils.database.execute(f"SELECT team_name, game FROM teams WHERE team_id='{team}';")
                 tname, game = utils.database.fetchone()
                 teamlist += f"{utils.emoji_list[count]} {tname} ({game})"
                 count += 1
@@ -118,7 +118,7 @@ class Teams:
             await ctx.send("That player could not be identified.")
             return
         #check that the target user has registered
-        utils.database.execute(f"SELECT username FROM players WHERE discord_id={user.id};")
+        utils.database.execute(f"SELECT username FROM players WHERE discord_id='{user.id}';")
         username, = utils.database.fetchone()
         if username == None:
             await ctx.send("That player is not registered.\nThey can register with **!register <username>**")
@@ -128,7 +128,7 @@ class Teams:
         if len(owned_teams) == 1:
             #check that the player is not already on a team for this game
             game = utils.teams.team_game(owned_teams[0])
-            utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id={user.id};")
+            utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{user.id}';")
             player_team = utils.database.fetchone()[0]
             if player_team != None:
                 await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
@@ -148,7 +148,7 @@ class Teams:
             for team in owned_teams:
                 if len(teamlist) > 0:
                     teamlist += '\n'
-                utils.database.execute(f"SELECT team_name, game FROM teams WHERE team_id={team};")
+                utils.database.execute(f"SELECT team_name, game FROM teams WHERE team_id='{team}';")
                 tname, game = utils.database.fetchone()
                 teamlist += f"{utils.emoji_list[count]} {tname} ({game})"
                 count += 1

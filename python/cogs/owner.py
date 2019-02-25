@@ -9,7 +9,7 @@ class Owner:
     @commands.command(pass_context=True)
     @utils.checks.server_owner()
     async def setting(self, ctx, key, value):
-        utils.database.execute(f"UPDATE servers SET {key}={value} WHERE server_id={ctx.guild.id};")
+        utils.database.execute(f"UPDATE servers SET {key}={value} WHERE server_id='{ctx.guild.id}';")
         utils.database.commit()
         await ctx.send("Setting has been updated.")
 

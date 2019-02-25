@@ -14,4 +14,4 @@ emoji_confirm = '✅'
 emoji_decline = '❌'
 
 def generate_id():
-    return uuid.uuid1().int>>64
+    return uuid.uuid1().hex

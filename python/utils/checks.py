@@ -10,7 +10,7 @@ def server_subscription():
 
 def is_registered():
     async def predicate(ctx):
-        database.execute(f"SELECT username FROM players WHERE discord_id={ctx.author.id};")
+        database.execute(f"SELECT username FROM players WHERE discord_id='{ctx.author.id}';")
         r = (database.fetchone() != None)
         if not ctx.message.content.startswith('!help') and not r:
             await ctx.send("You must be registered to use that command.\nYou can register with **!register <username>**")
@@ -19,7 +19,7 @@ def is_registered():
 
 def not_registered():
     async def predicate(ctx):
-        database.execute(f"SELECT username FROM players WHERE discord_id={ctx.author.id};")
+        database.execute(f"SELECT username FROM players WHERE discord_id='{ctx.author.id}';")
         r = (database.fetchone() == None)
         if not ctx.message.content.startswith('!help') and not r:
             await ctx.send("You have already registered.\nYou can change your name with **!changename <username>**")
@@ -28,7 +28,7 @@ def not_registered():
 
 def is_team_owner():
     async def predicate(ctx):
-        database.execute(f"SELECT team_id FROM teams WHERE owner_id={ctx.author.id} AND game=ANY(SELECT UNNEST(games) as games FROM servers WHERE server_id={ctx.guild.id});")
+        database.execute(f"SELECT team_id FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT UNNEST(games) as games FROM servers WHERE server_id='{ctx.guild.id}');")
         team_id = database.fetchone()
         if team_id == None:
             return False
