@@ -31,6 +31,10 @@ def substitute_players(team_id):
 async def select_team(ctx, user, team_list):
     #send a message to have the user select a team from a list
     #team_list should be a list of tuples: (team_id, team_name, game)
+    if len(team_list) == 0:
+        return None
+    if len(team_list) == 1:
+        return team_list[0][0]
     e = discord.Embed(title='Select Team', description=user.mention, colour=discord.Colour.blue())
     liststr = ""
     count = 0
@@ -52,7 +56,7 @@ async def select_team(ctx, user, team_list):
     utils.cache.add('select_team', msg.id, {'teams': tids, 'author': user, 'done': done})
     time = 0
     while selected_team == None:
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
         time += 1
         #timeout after 60 seconds
         if time >= 60:
