@@ -48,7 +48,7 @@ class CGL_Team(commands.RoleConverter):
                     return None
         except:
             pass
-        database.execute(f"SELECT team_id FROM teams WHERE lower(team_name)='{argument.lower()}';")
+        database.execute(f"SELECT team_id, team_name, game FROM teams WHERE lower(team_name)='{argument.lower()}';")
         allteams = database.fetchall()
         if allteams == None:
             await ctx.send("That team doesn't exist")
