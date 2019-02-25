@@ -22,9 +22,9 @@ async def set_region(bot, reaction, user):
     utils.database.execute(f"SELECT server_id, region_roles -> '{member_region}' FROM servers WHERE region_roles_enabled=TRUE;")
     serverlist = utils.database.fetchall()
     for sid, role in serverlist:
-        guild = bot.get_guild(sid)
+        guild = bot.get_guild(int(sid))
         member = guild.get_member(user.id)
-        await member.add_roles(guild.get_role(role))
+        await member.add_roles(guild.get_role(int(role)))
     utils.cache.delete('set_region_message', msg.id)
     utils.database.commit()
     await msg.delete()
@@ -100,14 +100,14 @@ async def create_team(bot, reaction, user):
     utils.database.execute(f"SELECT server_id, team_roles_enabled, default_role, hoist_roles, mention_roles FROM servers WHERE '{game}'=ANY(games);")
     allservers = utils.database.fetchall()
     for sid, team_roles_enabled, default_role, hoist_roles, mention_roles in allservers:
-        guild = bot.get_guild(sid)
+        guild = bot.get_guild(int(sid))
         member = guild.get_member(target_userid)
         if member != None:
             utils.database.execute(f"SELECT elo FROM server_players WHERE game='{game}' AND server_id='{sid}' AND discord_id='{target_userid}';")
             team_elo = utils.database.fetchone()[0]
             troleid = '0' #0 means no role
             if team_roles_enabled:
-                drole = guild.get_role(default_role)
+                drole = guild.get_role(int(default_role))
                 await member.remove_roles(drole)
                 trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                 await member.add_roles(trole)
@@ -150,8 +150,8 @@ async def change_team_name(bot, reaction, user):
     for sid, teams_json in allservers:
         teams = json.loads(teams_json)
         if owned_teams[0] in teams:
-            guild = bot.get_guild(sid)
-            role = guild.get_role(teams[owned_team])
+            guild = bot.get_guild(int(sid))
+            role = guild.get_role(int(teams[owned_team]))
             await role.edit(name=team_name)
     eteam_name = utils.security.escape_sql(team_name)
     utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id='{owned_team}';")

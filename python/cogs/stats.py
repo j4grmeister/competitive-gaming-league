@@ -34,7 +34,7 @@ class Stats:
         #server roles
         roles_str = ""
         for r in roles:
-            roles_str += f"{ctx.guild.get_role(r).name}\n"
+            roles_str += f"{ctx.guild.get_role(int(r)).name}\n"
         if len(roles_str) > 0:
             roles_str = roles_str[:-1]
             e.add_field(name='Roles', value=roles_str)

@@ -46,13 +46,13 @@ class Events:
             if roles:
                 teamid = utils.database.player_setting(member.id, 'team_id')
                 if teamid == None:
-                    await member.add_roles(guild.get_role(utils.database.server_setting(guild.id, 'default_role')))
+                    await member.add_roles(guild.get_role(int(utils.database.server_setting(guild.id, 'default_role'))))
                 #TODO: add/create team role if player is on a team
             if region:
                 member_region = utils.database.player_setting(member.id, 'region')
                 utils.database.execute(f"SELECT region_roles -> '{member_region}' from servers WHERE server_id='{guild.id}';")
                 region_role = utils.database.fetchone()[0]
-                await member.add_roles(guild.get_role(region_role))
+                await member.add_roles(guild.get_role(int(region_role)))
             utils.database.commit()
         #TODO: record server growth stats
 

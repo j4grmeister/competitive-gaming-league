@@ -37,14 +37,14 @@ class Teams:
             utils.database.execute(f"SELECT server_id, team_roles_enabled, default_role, hoist_roles, mention_roles FROM servers WHERE '{guild_games[0]}'=ANY(games);")
             allservers = utils.database.fetchall()
             for sid, team_roles_enabled, default_role, hoist_roles, mention_roles in allservers:
-                guild = self.bot.get_guild(sid)
+                guild = self.bot.get_guild(int(sid))
                 member = guild.get_member(ctx.author.id)
                 if member != None:
                     utils.database.execute(f"SELECT elo FROM server_players WHERE game='{guild_games[0]}' AND server_id='{ctx.guild.id}' AND discord_id='{ctx.author.id}';")
                     team_elo = utils.database.fetchone()[0]
                     troleid = '0' #0 means no role
                     if team_roles_enabled:
-                        drole = guild.get_role(default_role)
+                        drole = guild.get_role(int(default_role))
                         await member.remove_roles(drole)
                         trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                         await member.add_roles(trole)
@@ -86,8 +86,8 @@ class Teams:
             allservers = utils.database.fetchall()
             for sid, teams in allservers:
                 if owned_teams[0] in teams:
-                    guild = self.bot.get_guild(sid)
-                    role = guild.get_role(teams[owned_teams[0]])
+                    guild = self.bot.get_guild(int(sid))
+                    role = guild.get_role(int(teams[owned_teams[0]]))
                     await role.edit(name=team_name)
             eteam_name = utils.security.escape_sql(team_name)
             utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id='{owned_teams[0]}';")

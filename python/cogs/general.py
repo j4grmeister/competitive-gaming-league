@@ -38,11 +38,11 @@ class General:
         utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, games FROM servers;")
         serverlist = utils.database.fetchall()
         for sid, force, roles, games in serverlist:
-            guild = self.bot.get_guild(sid)
+            guild = self.bot.get_guild(int(sid))
             member = guild.get_member(ctx.author.id)
             if member != None:
-                default_elo[f"{sid}"] = {}
-                server_roles[f"{sid}"] = []
+                default_elo[sid] = {}
+                server_roles[sid] = []
                 for g in games:
                     delo = utils.database.server_setting(sid, 'default_elo')
                     utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ('{ctx.author.id}', '{sid}', '{g}', {delo});")
@@ -50,7 +50,7 @@ class General:
                     if member.id != guild.owner.id:
                         await member.edit(nick=username)
                 if roles:
-                    await member.add_roles(guild.get_role(utils.database.server_setting(sid, 'default_role')))
+                    await member.add_roles(guild.get_role(int(utils.database.server_setting(sid, 'default_role'))))
         utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb, awards=awards::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id='{ctx.author.id}';")
         #commit changes
         utils.database.commit()
@@ -84,7 +84,7 @@ class General:
         utils.database.execute("SELECT server_id FROM servers WHERE force_usernames=TRUE;")
         serverlist = utils.database.fetchall()
         for sid, in serverlist:
-            member = self.bot.get_guild(sid).get_member(ctx.author.id)
+            member = self.bot.get_guild(int(sid)).get_member(ctx.author.id)
             if member != None:
                 await member.edit(nick=username)
         #commit changes
