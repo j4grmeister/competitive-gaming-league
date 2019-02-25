@@ -31,7 +31,7 @@ class CGL_User(commands.UserConverter):
                 await ctx.send("That user is not a member of this server.")
                 return None
         if user == None:
-            return ctx.bot.get_user(discordid)
+            return ctx.bot.get_user(int(discordid))
         return user
 
 class CGL_Team(commands.RoleConverter):
