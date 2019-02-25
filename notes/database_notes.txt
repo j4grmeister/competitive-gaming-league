@@ -38,6 +38,8 @@ team_id TEXT
 server_id TEXT
 team_elo INT
 role_id TEXT
+primary_players TEXT[] DEFAULT '{}'
+substitute_players TEXT[] DEFAULT '{}'
 
 SERVER_PLAYERS:
 discord_id TEXT
