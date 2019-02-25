@@ -1,6 +1,6 @@
 import discord
 from python.utils import database
-import python.utils
+from python import utils
 import json
 import asyncio
 
