@@ -4,7 +4,7 @@ from python.utils import database
 from python.utils import cache
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
-import python.utils.teams
+from python.utils import teams
 
 class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
