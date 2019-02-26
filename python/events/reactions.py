@@ -22,32 +22,39 @@ async def team_invite(bot, reaction, user):
             utils.cache.delete('team_invite_message', msg.id)
             await msg.channel.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
             return True
+        #determine if the player is automatically a primary player
         max_primary = utils.config.games[game]['primary_players']
         primary = len(utils.teams.primary_players(team_id))
-        subs = len(utils.teams.substitute_players(team_id))
-        teamsize = primary + subs
         is_primary = (primary + 1 <= max_primary)
-        utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{ \"{game}\": \"{team_id}\" }}'::jsonb WHERE discord_id='{user.id}';")
-        #TODO: iterate through servers with the team in them instead of iterating through servers the team has an elo setting for
-        utils.database.execute(f"SELECT server_id, team_elo FROM server_teams WHERE team_id='{team_id}';")
-        servers = utils.database.fetchall()
-        for server_id, before_elo in allservers:
-            utils.database.execute(f"SELECT default_elo, games FROM servers WHERE server_id='{server_id}';")
-            p_elo, games = utils.database.fetchone()
-            utils.database.execute(f"SELECT discord_id FROM server_players WHERE server_id='{server_id}';")
-            if utils.database.fetchone() != None:
-                utils.database.execute(f"SELECT elo FROM server_players WHERE server_id='{server_id}' AND discord_id='{user.id}' AND game='{game}';")
-                p_elo, = utils.database.fetchone()
-            else:
-                #TODO: turn this into a single SQL query
-                for g in games:
-                    utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ('{user.id}', '{server_id}', '{g}', {p_elo});")
-            after_elo = (before_elo * teamsize + p_elo) / teamsize + 1
-            team_elo[server] = after_elo
+        roster_field = "substitute_players"
         if is_primary:
-            utils.database.execute(f"UPDATE teams SET primary_players=array_append(primary_players, '{user.id}'), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id='{team_id}';")
-        else:
-            utils.database.execute(f"UPDATE teams SET substitute_players=array_append(substitute_players, '{user.id}'), team_elo=team_elo::jsonb || '{json.dumps(team_elo)}'::jsonb WHERE team_id='{team_id}';")
+            roster_field = "primary_players"
+        #add the team to the player's database entry
+        utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{ \"{game}\": \"{team_id}\" }}'::jsonb WHERE discord_id='{user.id}';")
+        #add the player to the team's roster
+        utils.database.execute(f"UPDATE teams SET {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}';")
+        #get all the servers that the player is a member of in that the team is also registered in
+        utils.database.execute(f"""SELECT server_teams.server_id, server_teams.team_elo, server_players.elo, server_teams.primary_players, server_teams.substitute_players
+            FROM server_teams
+            INNER JOIN server_players ON server_teams.server_id=server_players.server_id
+            WHERE server_players.discord_id='{user.id}' AND server_players.is_member=true;""")
+        allservers = utils.database.fetchall()
+        for sid, before_elo, p_elo, pri, subs in allservers:
+            #calculate the new team elo for this server
+            team_size = len(pri) + len(subs)
+            sum = before_elo * min(team_size, utils.config.games[game]['primary_players']) + p_elo
+            #if the teamsize is less than a full team, then the default elo is factored in for each missing player
+            #so subtract default elo once if needed since the new player replaces it
+            if team_size < utils.config.games[game]['primary_players']:
+                #get the default elo for this server
+                utils.database.execute(f"SELECT default_elo FROM servers WHERE server_id='{sid}';")
+                default_elo, = utils.database.fetchone()
+                sum -= default_elo
+            #calculate the average
+            average = sum / min(team_size + 1, utils.config.games[game]['primary_players'])
+            #update the new elo value and add the player to the team roster on this server
+            utils.database.execute(f"UPDATE server_teams SET team_elo={average}, {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}' AND server_id='{sid}';")
+        #commit database changes
         utils.database.commit()
         await msg.delete()
         utils.cache.delete('team_invite_message', msg.id)

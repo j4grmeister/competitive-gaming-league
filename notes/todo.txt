@@ -3,3 +3,4 @@ rearrange role order
 recreate roles when deleted
 make commands not work in dms
 don't allow creating teams for games that don't have teams
+give an error when trying to get player info of a user who isnt registered, (using nickname, not @mention)
