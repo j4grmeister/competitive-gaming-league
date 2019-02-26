@@ -26,7 +26,7 @@ async def select_string(channel, user, options, *, select_multiple=False, title=
     def done(choice):
         nonlocal selected_string
         selected_string.set_result(choice)
-    utils.cache.add('select_string', msg.id, {'strings': options, 'author': user, 'done': done, 'select_multiple': select_multiple})
+    utils.cache.add('select_string', msg.id, {'options': options, 'author': user, 'done': done, 'select_multiple': select_multiple})
     try:
         await asyncio.wait_for(selected_string, timeout=timeout)
     except asyncio.TimeoutError:
