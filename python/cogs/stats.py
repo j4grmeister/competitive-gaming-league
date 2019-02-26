@@ -64,7 +64,7 @@ class Stats:
         if team == None:
             return
         utils.database.execute(f"SELECT teams.team_name, server_teams.primary_players, server_teams.substitute_players, server_teams.team_elo, server_teams.role_id FROM teams INNER JOIN server_teams ON teams.team_id=server_teams.team_id WHERE teams.team_id='{team}' AND server_teams.server_id='{ctx.guild.id}';")
-        teamname, primary_players, substitute_players, teamelo, roleid = database.fetchone()
+        teamname, primary_players, substitute_players, teamelo, roleid = utils.database.fetchone()
         desc = ""
         if roleid != None:
             desc = ctx.guild.get_role(int(roleid)).mention
