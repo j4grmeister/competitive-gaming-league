@@ -2,7 +2,7 @@ import discord
 import asyncio
 from python import utils
 
-async def select_string(channel, user, options, *, title='Select one', inst='Select an option'):
+async def select_string(channel, user, options, *, title='Select one', inst='Select an option', timeout=60):
     #options should be a list of strings
     if len(options) == 0:
         return None
@@ -26,16 +26,16 @@ async def select_string(channel, user, options, *, title='Select one', inst='Sel
         selected_string.set_result(choice)
     utils.cache.add('select_string', msg.id, {'strings': options, 'author': user, 'done': done})
     try:
-        await asyncio.wait_for(selected_string, timeout=60)
+        await asyncio.wait_for(selected_string, timeout=timeout)
     except asyncio.TimoutError:
         e.clear_fields()
-        e.add_field(name='Time expired', value='Selection timed out after 60 seconds.')
+        e.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
         await msg.edit(embed=e)
         utils.cache.delete('select_string', msg.id)
         return None
     return selected_string
 
-async def select_team(channel, user, team_list, *, title='Select team', inst='Select a team'):
+async def select_team(channel, user, team_list, *, title='Select team', inst='Select a team', timeout=60):
     #send a message to have the user select a team from a list
     #team_list should be a list of tuples: (team_id, team_name, game)
     if len(team_list) == 0:
@@ -62,10 +62,10 @@ async def select_team(channel, user, team_list, *, title='Select team', inst='Se
         selected_team.set_result(team)
     utils.cache.add('select_team', msg.id, {'teams': tids, 'author': user, 'done': done})
     try:
-        await asyncio.wait_for(selected_team, timeout=60)
+        await asyncio.wait_for(selected_team, timeout=timeout)
     except asyncio.TimeoutError:
         e.clear_fields()
-        e.add_field(name='Time expired', value='Selection timed out after 60 seconds.')
+        e.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
         await msg.edit(embed=e)
         utils.cache.delete('select_team', msg.id)
         return None
