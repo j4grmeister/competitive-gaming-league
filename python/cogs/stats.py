@@ -38,7 +38,7 @@ class Stats:
             return
         #get player data
         utils.database.execute(f"SELECT username, teams, awards -> '{ctx.guild.id}' FROM players WHERE discord_id='{player.id}';")
-        username, teams, roles, awards = utils.database.fetchone()
+        username, teams, awards = utils.database.fetchone()
         utils.database.execute(f"SELECT game, elo FROM server_players WHERE server_id='{ctx.guild.id}' AND discord_id='{player.id}';")
         allelo = utils.database.fetchall()
         e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
