@@ -21,6 +21,8 @@ class Teams:
         guild_games = utils.database.server_setting(ctx.guild.id, 'games')
         #have the user select a game
         game = await utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select Game', inst='Choose a game for your team')
+        if game == None:
+            return
         #check that the player isnt already on a team for this server's game
         utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{ctx.author.id}';")
         player_team, = utils.database.fetchone()
@@ -48,7 +50,7 @@ class Teams:
                     trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                     await member.add_roles(trole)
                     troleid = trole.id
-                utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}');")
+                utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id, primary_players) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}', '{{ \"{ctx.author.id}\" }}');")
         #create the team's database entry
         utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ('{ctx.author.id}', '{teamid}', '{game}', '{eteam_name}', '{{ \"{ctx.author.id}\" }}');")
         #add the user to the team
@@ -68,6 +70,8 @@ class Teams:
         utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT games FROM servers WHERE server_id='{ctx.guild.id}');")
         owned_teams = utils.database.fetchall()
         team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to change its name')
+        if team == None:
+            return
         utils.database.execute(f"""SELECT server_teams.server_id, server_teams.role_id
             FROM server_teams
             INNER JOIN servers ON server_teams.server_id=servers.server_id
@@ -100,7 +104,8 @@ class Teams:
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
         team = await utils.selector.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
-
+        if team == None:
+            return
         #check that the player is not already on a team for this game
         game = utils.teams.team_game(team)
         utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{user.id}';")
