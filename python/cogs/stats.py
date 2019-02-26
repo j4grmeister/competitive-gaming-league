@@ -63,10 +63,8 @@ class Stats:
     async def teaminfo(self, ctx, *, team: utils.converters.CGL_Team):
         if team == None:
             return
-        database.execute(f"SELECT teams.team_name, server_teams.primary_players, server_teams.substitute_players FROM teams INNER JOIN server_teams ON teams.team_id=server_teams.team_id WHERE team_id='{team}';")
-        teamname, primary_players, substitute_players = database.fetchone()
-        database.execute(f"SELECT team_elo, role_id FROM server_teams WHERE server_id='{ctx.guild.id}' AND team_id='{team}';")
-        teamelo, roleid = database.fetchone()
+        database.execute(f"SELECT teams.team_name, server_teams.primary_players, server_teams.substitute_players, server_teams.team_elo, server_teams.role_id FROM teams INNER JOIN server_teams ON teams.team_id=server_teams.team_id WHERE team_id='{team}' AND server_id='{ctx.guild.id}';")
+        teamname, primary_players, substitute_players, teamelo, roleid = database.fetchone()
         desc = ""
         if roleid != None:
             desc = ctx.guild.get_role(int(roleid)).mention
