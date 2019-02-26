@@ -37,7 +37,7 @@ class Stats:
         if player == None:
             return
         #get player data
-        utils.database.execute(f"SELECT username, teams, server_roles -> '{ctx.guild.id}', awards -> '{ctx.guild.id}' FROM players WHERE discord_id='{player.id}';")
+        utils.database.execute(f"SELECT username, teams, awards -> '{ctx.guild.id}' FROM players WHERE discord_id='{player.id}';")
         username, teams, roles, awards = utils.database.fetchone()
         utils.database.execute(f"SELECT game, elo FROM server_players WHERE server_id='{ctx.guild.id}' AND discord_id='{player.id}';")
         allelo = utils.database.fetchall()
@@ -57,13 +57,6 @@ class Stats:
         if len(teams_str) > 0:
             teams_str = teams_str[:-1]
             e.add_field(name='Team', value=teams_str)
-        #server roles
-        roles_str = ""
-        for r in roles:
-            roles_str += f"{ctx.guild.get_role(int(r)).name}\n"
-        if len(roles_str) > 0:
-            roles_str = roles_str[:-1]
-            e.add_field(name='Roles', value=roles_str)
         #awards
         awards_str = ""
         for a in awards:
