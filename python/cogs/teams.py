@@ -100,7 +100,7 @@ class Teams:
             await ctx.send("That player is not registered.\nThey can register with **!register <username>**")
             return
         #get the author's owned teams
-        utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT games FROM servers WHERE server_id='{ctx.guild.id}');")
+        utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(unnest(SELECT games FROM servers WHERE server_id='{ctx.guild.id}'));")
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
         team = await utils.selector.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
