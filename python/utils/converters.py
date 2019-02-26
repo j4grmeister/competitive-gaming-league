@@ -4,7 +4,7 @@ from python.utils import database
 from python.utils import cache
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
-from python.utils import teams
+from python.utils import selectors
 
 class CGL_User(commands.UserConverter):
     async def convert(self, ctx, argument):
@@ -53,5 +53,5 @@ class CGL_Team(commands.RoleConverter):
         if allteams == None:
             await ctx.send("That team doesn't exist")
             return None
-        team = await teams.select_team(ctx, ctx.author, allteams)
+        team = await selectors.select_team(ctx, ctx.author, allteams)
         return team

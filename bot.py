@@ -24,6 +24,10 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"failed to load extension {ext}.\n" + str(e))
 
+#To whomever may read or edit any code contained in this project,
+#I apologize.
+#-Nick Greene
+
 @bot.event
 async def on_ready():
     print('Logged in as')
