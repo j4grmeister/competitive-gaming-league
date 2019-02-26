@@ -103,7 +103,7 @@ class Teams:
         utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT unnest(games) FROM servers WHERE server_id='{ctx.guild.id}');")
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
-        team = await utils.selector.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
+        team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
         if team == None:
             return
         #check that the player is not already on a team for this game
