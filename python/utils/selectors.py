@@ -16,7 +16,7 @@ async def select_string(channel, user, options, *, select_multiple=False, title=
             liststr += '\n'
         liststr += f"{utils.emoji_list[count]} {o}"
         count += 1
-    e.add_field(name='inst', value=liststr)
+    e.add_field(name=inst, value=liststr)
     msg = await channel.send(embed=e)
     for x in range(count):
         await msg.add_reaction(utils.emoji_list[x])
@@ -29,7 +29,7 @@ async def select_string(channel, user, options, *, select_multiple=False, title=
     utils.cache.add('select_string', msg.id, {'strings': options, 'author': user, 'done': done, 'select_multiple': select_multiple})
     try:
         await asyncio.wait_for(selected_string, timeout=timeout)
-    except asyncio.TimoutError:
+    except asyncio.TimeoutError:
         e.clear_fields()
         e.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
         await msg.edit(embed=e)
