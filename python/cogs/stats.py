@@ -61,11 +61,11 @@ class Stats:
 
     @commands.command(pass_context=True)
     async def teaminfo(self, ctx, *, team: utils.converters.CGL_Team):
-        if teamid == None:
+        if team == None:
             return
-        database.execute(f"SELECT team_name, primary_players, substitute_players FROM teams WHERE team_id='{teamid}';")
+        database.execute(f"SELECT teams.team_name, server_teams.primary_players, server_teams.substitute_players FROM teams INNER JOIN server_teams ON teams.team_id=server_teams.team_id WHERE team_id='{team}';")
         teamname, primary_players, substitute_players = database.fetchone()
-        database.execute(f"SELECT team_elo, role_id FROM server_teams WHERE server_id='{ctx.guild.id}' AND team_id='{teamid}';")
+        database.execute(f"SELECT team_elo, role_id FROM server_teams WHERE server_id='{ctx.guild.id}' AND team_id='{team}';")
         teamelo, roleid = database.fetchone()
         desc = ""
         if roleid != None:
