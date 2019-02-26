@@ -84,7 +84,7 @@ class Stats:
         desc = ""
         if roleid != None:
             desc = ctx.guild.get_role(int(roleid)).mention
-        e = discord.Embed(title=teamname, description=desc colour=discord.Colour.blue())
+        e = discord.Embed(title=teamname, description=desc, colour=discord.Colour.blue())
         e.add_field(name='Team Elo', value=teamelo)
 
         primary_str = ""
