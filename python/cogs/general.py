@@ -33,16 +33,12 @@ class General:
         #enter the user in the database
         utils.database.execute(f"INSERT INTO players (discord_id, username) values ('{ctx.author.id}', '{eusername}');")
         #apply server settings in all servers
-        default_elo = {}
-        server_roles = {}
         utils.database.execute("SELECT server_id, force_usernames, team_roles_enabled, games FROM servers;")
         serverlist = utils.database.fetchall()
         for sid, force, roles, games in serverlist:
             guild = self.bot.get_guild(int(sid))
             member = guild.get_member(ctx.author.id)
             if member != None:
-                default_elo[sid] = {}
-                server_roles[sid] = []
                 for g in games:
                     delo = utils.database.server_setting(sid, 'default_elo')
                     utils.database.execute(f"INSERT INTO server_players (discord_id, server_id, game, elo) VALUES ('{ctx.author.id}', '{sid}', '{g}', {delo});")
@@ -51,7 +47,6 @@ class General:
                         await member.edit(nick=username)
                 if roles:
                     await member.add_roles(guild.get_role(int(utils.database.server_setting(sid, 'default_role'))))
-        utils.database.execute(f"UPDATE players SET server_roles=server_roles::jsonb || '{json.dumps(server_roles)}'::jsonb, awards=awards::jsonb || '{json.dumps(server_roles)}'::jsonb WHERE discord_id='{ctx.author.id}';")
         #commit changes
         utils.database.commit()
         #notify the user that they have successfully registered
