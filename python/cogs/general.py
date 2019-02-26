@@ -98,6 +98,8 @@ class General:
     async def setregion(self, ctx):
         """Choose your region."""
         region = await utils.selectors.select_string(ctx.channel, ctx.author, ['🇺🇸', '🇪🇺'], title='Set Region', inst='React with your region below')
+        if region == None:
+            return
         member_region == None
         if region == '🇺🇸':
             member_region = "NA"
