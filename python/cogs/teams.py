@@ -20,7 +20,7 @@ class Teams:
         #get the list of games for this server
         guild_games = utils.database.server_setting(ctx.guild.id, 'games')
         #have the user select a game
-        game = (await utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select Game', inst='Choose a game for your team')).result()
+        game = await utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select Game', inst='Choose a game for your team')
         if game == None:
             return
         #check that the player isnt already on a team for this server's game

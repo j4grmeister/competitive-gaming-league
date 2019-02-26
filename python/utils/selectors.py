@@ -35,7 +35,7 @@ async def select_string(channel, user, options, *, select_multiple=False, title=
         await msg.edit(embed=e)
         utils.cache.delete('select_string', msg.id)
         return None
-    return selected_string
+    return selected_string.result()
 
 async def select_team(channel, user, team_list, *, title='Select team', inst='Select a team', timeout=60):
     #send a message to have the user select a team from a list
@@ -71,4 +71,4 @@ async def select_team(channel, user, team_list, *, title='Select team', inst='Se
         await msg.edit(embed=e)
         utils.cache.delete('select_team', msg.id)
         return None
-    return selected_team
+    return selected_team.result()
