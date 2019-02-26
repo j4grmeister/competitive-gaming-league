@@ -20,7 +20,7 @@ class Teams:
         #get the list of games for this server
         guild_games = utils.database.server_setting(ctx.guild.id, 'games')
         #have the user select a game
-        game = utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select a game', inst='Choose a game for your team')
+        game = await utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select a game', inst='Choose a game for your team')
         #check that the player isnt already on a team for this server's game
         utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{ctx.author.id}';")
         player_team, = utils.database.fetchone()
@@ -67,7 +67,7 @@ class Teams:
         #get the author's owned teams
         utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT games FROM servers WHERE server_id='{ctx.guild.id}');")
         owned_teams = utils.database.fetchall()
-        team = utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select team', inst='Select a team to change its name')
+        await team = utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select team', inst='Select a team to change its name')
         utils.database.execute(f"""SELECT server_teams.server_id, server_teams.role_id
             FROM server_teams
             INNER JOIN servers ON server_teams.server_id=servers.server_id
@@ -99,7 +99,7 @@ class Teams:
         utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT games FROM servers WHERE server_id='{ctx.guild.id}');")
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
-        team = utils.selector.select_team(ctx.channel, ctx.author, owned_teams, title='Select team', inst='Select a team to send an invite for')
+        await team = utils.selector.select_team(ctx.channel, ctx.author, owned_teams, title='Select team', inst='Select a team to send an invite for')
 
         #check that the player is not already on a team for this game
         game = utils.teams.team_game(team)
