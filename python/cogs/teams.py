@@ -120,7 +120,7 @@ class Teams:
         msg = await user.send(embed=e)
         await msg.add_reaction(utils.emoji_confirm)
         await msg.add_reaction(utils.emoji_decline)
-        utils.cache.add('team_invite_message', msg.id, owned_teams[0])
+        utils.cache.add('team_invite_message', msg.id, team)
         await ctx.send(f"{username} has been invited to {team_name}.")
 
 def setup(bot):
