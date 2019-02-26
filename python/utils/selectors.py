@@ -2,7 +2,7 @@ import discord
 import asyncio
 from python import utils
 
-async def select_string(ctx, user, options, *, title='Select one', inst='Select an option'):
+async def select_string(channel, user, options, *, title='Select one', inst='Select an option'):
     #options should be a list of strings
     if len(options) == 0:
         return None
@@ -17,7 +17,7 @@ async def select_string(ctx, user, options, *, title='Select one', inst='Select 
         liststr += f"{utils.emoji_list[count]} {o}"
         count += 1
     e.add_field(name='inst', value=liststr)
-    msg = await ctx.send(embed=e)
+    msg = await channel.send(embed=e)
     for x in range(count):
         await msg.add_reaction(utils.emoji_list[x])
     selected_string = asyncio.get_event_loop().create_future()
@@ -35,14 +35,14 @@ async def select_string(ctx, user, options, *, title='Select one', inst='Select 
         return None
     return selected_string
 
-async def select_team(ctx, user, team_list):
+async def select_team(channel, user, team_list, *, title='Select team', inst='Select a team'):
     #send a message to have the user select a team from a list
     #team_list should be a list of tuples: (team_id, team_name, game)
     if len(team_list) == 0:
         return None
     if len(team_list) == 1:
         return team_list[0][0]
-    e = discord.Embed(title='Select Team', description=user.mention, colour=discord.Colour.blue())
+    e = discord.Embed(title=title, description=user.mention, colour=discord.Colour.blue())
     liststr = ""
     count = 0
     tids = []
@@ -52,8 +52,8 @@ async def select_team(ctx, user, team_list):
             liststr += '\n'
         liststr += f"{utils.emoji_list[count]} {team_name} **({game})**"
         count += 1
-    e.add_field(name='Select a team', value=liststr)
-    msg = await ctx.send(embed=e)
+    e.add_field(name=inst, value=liststr)
+    msg = await channel.send(embed=e)
     for x in range(count):
         await msg.add_reaction(utils.emoji_list[x])
     selected_team = asyncio.get_event_loop().create_future()

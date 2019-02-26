@@ -5,11 +5,7 @@ from python.events import reactions
 
 reaction_handlers = [
     reactions.set_region,
-    reactions.get_roles,
-    reactions.create_team,
-    reactions.change_team_name,
     reactions.team_invite,
-    reactions.invite_to_team,
     reactions.select_string,
     reactions.select_team
 ]
