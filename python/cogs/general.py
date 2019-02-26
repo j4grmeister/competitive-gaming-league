@@ -97,40 +97,22 @@ class General:
     @utils.checks.is_registered()
     async def setregion(self, ctx):
         """Choose your region."""
-        e = discord.Embed(title="Set Region", description=ctx.author.mention, colour=discord.Colour.blue())
-        e.add_field(name="Choose your region", value="React with your region below")
-        msg = await ctx.send(embed=e)
-        await msg.add_reaction('🇺🇸')
-        await msg.add_reaction('🇪🇺')
-        utils.cache.add('set_region_message', msg.id, ctx.author.id)
-
-    @commands.command(pass_context=True)
-    @utils.checks.server_subscription()
-    @utils.checks.is_registered()
-    async def getroles(self, ctx):
-        """Request server roles."""
-        e = discord.Embed(title="Get Roles", description=ctx.author.mention, colour=discord.Colour.blue())
-        roles = utils.database.server_setting(ctx.guild.id, 'requestable_roles')
-        field_value = ""
-        valid = True
-        role_count = 0
-        if len(roles) > 0:
-            for rolename in roles:
-                if len(field_value) > 0:
-                    field_value += '\n'
-                field_value += f"{utils.emoji_list[count]} {rolename}"
-                role_count += 1
-        else:
-            field_value = "There are no requestable roles for this server."
-            valid = False
-        e.add_field(name="Choose your roles", value=field_value)
-        msg = await ctx.send(embed=e)
-        if not valid:
-            return
-        for x in range(role_count):
-            await msg.add_reaction(utils.emoji_list[x])
-        await msg.add_reaction(utils.emoji_confirm)
-        utils.cache.add('get_roles_message', msg.id, ctx.author.id)
+        region = await utils.selectors.select_string(ctx.channel, ctx.author, ['🇺🇸', '🇪🇺'], title='Set Region', inst='React with your region below')
+        member_region == None
+        if region == '🇺🇸':
+            member_region = "NA"
+        elif region == '🇪🇺':
+            member_region = "EU"
+        utils.database.execute(f"UPDATE players SET region='{member_region}' WHERE discord_id='{ctx.author.id}';")
+        #grant region roles in all servers
+        utils.database.execute(f"SELECT server_id, region_roles -> '{member_region}' FROM servers WHERE region_roles_enabled=TRUE;")
+        serverlist = utils.database.fetchall()
+        for sid, role in serverlist:
+            guild = bot.get_guild(int(sid))
+            member = guild.get_member(ctx.author.id)
+            await member.add_roles(guild.get_role(int(role)))
+        utils.database.commit()
+        await ctx.send("Your region has been updated.")
 
 def setup(bot):
     bot.add_cog(General(bot))

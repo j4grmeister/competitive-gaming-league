@@ -2,7 +2,7 @@ import discord
 import asyncio
 from python import utils
 
-async def select_string(channel, user, options, *, title='Select one', inst='Select an option', timeout=60):
+async def select_string(channel, user, options, *, select_multiple=False, title='Select one', inst='Select an option', timeout=60):
     #options should be a list of strings
     if len(options) == 0:
         return None
@@ -20,11 +20,13 @@ async def select_string(channel, user, options, *, title='Select one', inst='Sel
     msg = await channel.send(embed=e)
     for x in range(count):
         await msg.add_reaction(utils.emoji_list[x])
+    if select_multiple:
+        await msg.add_reaction(utils.emoji_confirm)
     selected_string = asyncio.get_event_loop().create_future()
     def done(choice):
         nonlocal selected_string
         selected_string.set_result(choice)
-    utils.cache.add('select_string', msg.id, {'strings': options, 'author': user, 'done': done})
+    utils.cache.add('select_string', msg.id, {'strings': options, 'author': user, 'done': done, 'select_multiple': select_multiple})
     try:
         await asyncio.wait_for(selected_string, timeout=timeout)
     except asyncio.TimoutError:

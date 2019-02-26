@@ -3,83 +3,6 @@ from discord.ext import commands
 from python import utils
 import json
 
-async def set_region(bot, reaction, user):
-    msg = reaction.message
-    target_userid = utils.cache.get('set_region_message', msg.id)
-    if target_userid == None:
-        return False
-    if target_userid != user.id:
-        return True
-    member_region = ""
-    if reaction.emoji == '🇺🇸':
-        member_region = "NA"
-    elif reaction.emoji == '🇪🇺':
-        member_region = "EU"
-    else:
-        return True
-    utils.database.execute(f"UPDATE players SET region='{member_region}' WHERE discord_id='{target_userid}';")
-    #grant region roles in all servers
-    utils.database.execute(f"SELECT server_id, region_roles -> '{member_region}' FROM servers WHERE region_roles_enabled=TRUE;")
-    serverlist = utils.database.fetchall()
-    for sid, role in serverlist:
-        guild = bot.get_guild(int(sid))
-        member = guild.get_member(user.id)
-        await member.add_roles(guild.get_role(int(role)))
-    utils.cache.delete('set_region_message', msg.id)
-    utils.database.commit()
-    await msg.delete()
-    await msg.channel.send("Your region has been updated.")
-    return True
-
-async def get_roles(bot, reaction, user):
-    msg = reaction.message
-    guild = msg.guild
-    target_userid = utils.cache.get('get_roles_message', msg.id)
-    if target_userid == None:
-        return False
-    if target_userid != user.id:
-        return True
-    if reaction.emoji != utils.emoji_confirm:
-        return True
-    server_roles = json.loads(utils.database.server_setting(msg.channel.guild.id, 'requestable_roles'))
-    #not sure if this little bit works
-    utils.database.execute(f"SELECT server_roles -> '{guild.id}' FROM players WHERE discord_id='{user.id}';")
-    member_roles = json.loads(utils.database.fetchone()[0])
-    #end of uncertainty
-    allreactions = msg.reactions
-    for r in allreactions:
-        if r.emoji in utils.emoji_list:
-            users = await r.users().flatten()
-            user_reacted = (next((u for u in users if u.id == target_userid), None) != None)
-            bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
-            if user_reacted and bot_reacted:
-                index = utils.emoji_list.index(r.emoji)
-                roleid = list(server_roles.values())[index]
-                if roleid in member_roles:
-                    await user.remove_roles(guild.get_role(roleid))
-                else:
-                    await user.add_roles(guild.get_role(roleid))
-    utils.cache.delete('get_roles_message', msg.id)
-    utils.database.commit()
-    await msg.delete()
-    await msg.channel.send("Your roles have been updated.")
-    return True
-
-    utils.database.execute("SELECT server_id, teams FROM servers WHERE team_roles_enabled=TRUE;")
-    allservers = utils.database.fetchall()
-    for sid, teams_json in allservers:
-        teams = json.loads(teams_json)
-        if owned_teams[0] in teams:
-            guild = bot.get_guild(int(sid))
-            role = guild.get_role(int(teams[owned_team]))
-            await role.edit(name=team_name)
-    eteam_name = utils.security.escape_sql(team_name)
-    utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id='{owned_team}';")
-    utils.database.commit()
-    utils.cache.delete('change_team_name_message', msg.id)
-    await msg.delete()
-    await msg.channel.send("Your team name has been changed.")
-
 async def team_invite(bot, reaction, user):
     msg = reaction.message
     team_id = utils.cache.get('team_invite_message', msg.id)
@@ -143,12 +66,26 @@ async def select_string(bot, reaction, user):
         return True
     options = cached_data['options']
     selected_string = None
-    bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
-    if bot_reacted:
-        index = utils.emoji_list.index(reaction.emoji)
-        selected_string = options[index]
-    else:
+    if cached_data['select_multiple']:
+        if reaction.emoji != utils.emoji_confirm:
+            return True
+        selected_string = []
+        for r in reaction.message.reactions:
+            if r.emoji in utils.emoji_list:
+                bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
+                user_reacted = (next((u for u in users if u.id == target_userid), None) != None)
+                if bot_reacted and user_reacted:
+                    index = utils.emoji_list.index(r.emoji)
+                    selected_string.append(options[index])
         return True
+    else:
+        selected_string = None
+        bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
+        if bot_reacted:
+            index = utils.emoji_list.index(reaction.emoji)
+            selected_string = options[index]
+        else:
+            return True
     #continue execution of the thread that requested the selection
     cached_data['done'](selected_string)
     utils.cache.delete('select_team', msg.id)

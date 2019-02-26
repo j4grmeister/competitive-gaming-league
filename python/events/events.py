@@ -4,7 +4,6 @@ from python import utils
 from python.events import reactions
 
 reaction_handlers = [
-    reactions.set_region,
     reactions.team_invite,
     reactions.select_string,
     reactions.select_team
