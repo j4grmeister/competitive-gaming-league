@@ -111,6 +111,7 @@ async def select_team(bot, reaction, user):
         return True
     teams = cached_data['teams']
     selected_team = None
+    users = await reaction.users().flatten()
     bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
     if bot_reacted:
         index = utils.emoji_list.index(reaction.emoji)
