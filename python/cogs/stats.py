@@ -37,8 +37,8 @@ class Stats:
         if player == None:
             return
         #get player data
-        utils.database.execute(f"SELECT username, teams, awards -> '{ctx.guild.id}' FROM players WHERE discord_id='{player.id}';")
-        username, teams, awards = utils.database.fetchone()
+        utils.database.execute(f"SELECT username, teams FROM players WHERE discord_id='{player.id}';")
+        username, teams = utils.database.fetchone()
         utils.database.execute(f"SELECT game, elo FROM server_players WHERE server_id='{ctx.guild.id}' AND discord_id='{player.id}';")
         allelo = utils.database.fetchall()
         e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
@@ -57,13 +57,6 @@ class Stats:
         if len(teams_str) > 0:
             teams_str = teams_str[:-1]
             e.add_field(name='Team', value=teams_str)
-        #awards
-        awards_str = ""
-        for a in awards:
-            awards_str += f"{a}\n"
-        if len(awards_str) > 0:
-            awards_str = awards_str[:-1]
-            e.add_field(name='Awards', value=awards_str)
         await ctx.send(embed=e)
 
     @commands.command(pass_context=True)
