@@ -253,6 +253,29 @@ async def invite_to_team(bot, reaction, user):
     await msg.delete()
     return True
 
+async def select_string(bot, reaction, user):
+    #get the string that was selected
+    msg = reaction.message
+    cached_data = utils.cache.get('select_string', msg.id)
+    if cached_data == None:
+        return False
+    author = cached_data['author']
+    if author.id != user.id:
+        return True
+    options = cached_data['options']
+    selected_string = None
+    bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
+    if bot_reacted:
+        index = utils.emoji_list.index(reaction.emoji)
+        selected_string = options[index]
+    else:
+        return True
+    #continue execution of the thread that requested the selection
+    cached_data['done'](selected_string)
+    utils.cache.delete('select_team', msg.id)
+    await msg.delete()
+    return True
+
 async def select_team(bot, reaction, user):
     #get the team that was selected
     msg = reaction.message
@@ -264,16 +287,13 @@ async def select_team(bot, reaction, user):
         return True
     teams = cached_data['teams']
     selected_team = None
-    if reaction.emoji in utils.emoji_list:
-        bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
-        if bot_reacted:
-            index = utils.emoji_list.index(reaction.emoji)
-            selected_team = teams[index]
-        else:
-            return True
+    bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
+    if bot_reacted:
+        index = utils.emoji_list.index(reaction.emoji)
+        selected_team = teams[index]
     else:
         return True
-    #continue execution of the thread that this was called by
+    #continue execution of the thread that requested the selection
     cached_data['done'](selected_team)
     utils.cache.delete('select_team', msg.id)
     await msg.delete()
