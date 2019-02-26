@@ -80,7 +80,7 @@ async def select_string(bot, reaction, user):
         return True
     else:
         selected_string = None
-        users = r.users.flatten()
+        users = reaction.users.flatten()
         bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
         if bot_reacted:
             index = utils.emoji_list.index(reaction.emoji)
