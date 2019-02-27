@@ -47,6 +47,7 @@ async def team_invite(bot, reaction, user):
             WHERE
                 server_teams.team_id='{team_id}' AND
                 server_players.discord_id='{user.id}' AND
+                server_players.game='{game}' AND
                 server_players.is_member=true
         ;""")
         allservers = utils.database.fetchall()
