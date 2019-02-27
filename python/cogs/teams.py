@@ -35,21 +35,19 @@ class Teams:
         eteam_name = utils.security.escape_sql(team_name)
         #get all the servers that the player is in that have this game as their primary game
         #create team roles as well
-        utils.database.execute(f"SELECT server_id, team_roles_enabled, default_role, hoist_roles, mention_roles FROM servers WHERE '{game}'=ANY(games);")
+        utils.database.execute(f"SELECT server_id, team_roles_enabled, hoist_roles, mention_roles FROM servers WHERE '{game}'=ANY(games);")
         allservers = utils.database.fetchall()
-        for sid, team_roles_enabled, default_role, hoist_roles, mention_roles in allservers:
+        for sid, team_roles_enabled, hoist_roles, mention_roles in allservers:
             guild = self.bot.get_guild(int(sid))
             member = guild.get_member(ctx.author.id)
             if member != None:
                 utils.database.execute(f"SELECT elo FROM server_players WHERE game='{game}' AND server_id='{ctx.guild.id}' AND discord_id='{ctx.author.id}';")
                 team_elo, = utils.database.fetchone()
-                troleid = '0' #0 means no role
+                troleid = '-1' #-1 means no role
                 if team_roles_enabled:
-                    drole = guild.get_role(int(default_role))
-                    await member.remove_roles(drole)
-                    trole = await guild.create_role(name=team_name, permissions=drole.permissions, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
+                    trole = await guild.create_role(name=team_name, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                     await member.add_roles(trole)
-                    troleid = trole.id
+                    troleid = str(trole.id)
                 utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id, primary_players) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}', '{{ \"{ctx.author.id}\" }}');")
         #create the team's database entry
         utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ('{ctx.author.id}', '{teamid}', '{game}', '{eteam_name}', '{{ \"{ctx.author.id}\" }}');")

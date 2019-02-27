@@ -34,15 +34,18 @@ async def team_invite(bot, reaction, user):
         #add the player to the team's roster
         utils.database.execute(f"UPDATE teams SET {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}';")
         #get all the servers that the player is a member of in that the team is also registered in
-        utils.database.execute(f"""SELECT server_teams.server_id, server_teams.team_elo, server_players.elo, server_teams.primary_players, server_teams.substitute_players
+        utils.database.execute(f"""SELECT server_teams.server_id, server_teams.role_id, server_teams.team_elo, server_players.elo, server_teams.primary_players, server_teams.substitute_players
             FROM server_teams
             INNER JOIN server_players ON server_teams.server_id=server_players.server_id
             WHERE server_players.discord_id='{user.id}' AND server_players.is_member=true;""")
         allservers = utils.database.fetchall()
-        for sid, before_elo, p_elo, pri, subs in allservers:
+        for sid, role_id, before_elo, p_elo, pri, subs in allservers:
+            #assign team roles if needed
+            if role_id != '-1':
+                await user.add_roles(msg.guild.get_role(int(role_id)))
             #calculate the new team elo for this server
             team_size = len(pri) + len(subs)
-            sum = before_elo * min(team_size, utils.config.games[game]['primary_players']) + p_elo
+            sum = before_elo * max(team_size, utils.config.games[game]['primary_players']) + p_elo
             #if the teamsize is less than a full team, then the default elo is factored in for each missing player
             #so subtract default elo once if needed since the new player replaces it
             if team_size < utils.config.games[game]['primary_players']:
@@ -51,7 +54,7 @@ async def team_invite(bot, reaction, user):
                 default_elo, = utils.database.fetchone()
                 sum -= default_elo
             #calculate the average
-            average = sum / min(team_size + 1, utils.config.games[game]['primary_players'])
+            average = sum / max(team_size + 1, utils.config.games[game]['primary_players'])
             #update the new elo value and add the player to the team roster on this server
             utils.database.execute(f"UPDATE server_teams SET team_elo={average}, {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}' AND server_id='{sid}';")
         #commit database changes
