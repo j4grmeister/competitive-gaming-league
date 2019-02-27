@@ -34,10 +34,21 @@ async def team_invite(bot, reaction, user):
         #add the player to the team's roster
         utils.database.execute(f"UPDATE teams SET {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}';")
         #get all the servers that the player is a member of in that the team is also registered in
-        utils.database.execute(f"""SELECT server_teams.server_id, server_teams.role_id, server_teams.team_elo, server_players.elo, server_teams.primary_players, server_teams.substitute_players
+        utils.database.execute(f"""
+            SELECT
+                server_teams.server_id,
+                server_teams.role_id,
+                server_teams.team_elo,
+                server_players.elo,
+                server_teams.primary_players,
+                server_teams.substitute_players
             FROM server_teams
             INNER JOIN server_players ON server_teams.server_id=server_players.server_id
-            WHERE server_players.discord_id='{user.id}' AND server_players.is_member=true;""")
+            WHERE
+                server_teams.team_id='{team_id}' AND
+                server_players.discord_id='{user.id}' AND
+                server_players.is_member=true
+        ;""")
         allservers = utils.database.fetchall()
         for sid, role_id, before_elo, p_elo, pri, subs in allservers:
             #assign team roles if needed
