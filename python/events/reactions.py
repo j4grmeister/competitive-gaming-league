@@ -56,6 +56,7 @@ async def team_invite(bot, reaction, user):
             #calculate the average
             average = sum / max(team_size + 1, utils.config.games[game]['primary_players'])
             #update the new elo value and add the player to the team roster on this server
+            print('update server team')
             utils.database.execute(f"UPDATE server_teams SET team_elo={average}, {roster_field}=array_append({roster_field}, '{user.id}') WHERE team_id='{team_id}' AND server_id='{sid}';")
         #commit database changes
         utils.database.commit()
