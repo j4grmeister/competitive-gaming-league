@@ -3,14 +3,14 @@ server_id TEXT
 owner_id TEXT
 default_elo INTEGER DEFAULT 1300
 elo_k_factor INTEGER DEFAULT 64
-force_usernames BOOLEAN DEFAULT FALSE
-team_roles_enabled BOOLEAN DEFAULT FALSE
-default_role BIGINT
-region_roles_enabled BOOLEAN DEFAULT FALSE
+force_usernames BOOLEAN DEFAULT true
+team_roles_enabled BOOLEAN DEFAULT true
+*default_role BIGINT
+region_roles_enabled BOOLEAN DEFAULT true
 region_roles JSON DEFAULT '{}' {'region': roleid}
 games TEXT[] DEFAULT '{"csgo"}'
-hoist_roles BOOLEAN DEFAULT FALSE
-mention_roles BOOLEAN DEFAULT TRUE
+hoist_roles BOOLEAN DEFAULT true
+mention_roles BOOLEAN DEFAULT true
 
 PLAYERS:
 discord_id TEXT
@@ -36,11 +36,11 @@ team_elo INT
 role_id TEXT #'-1' means there is no role
 primary_players TEXT[] DEFAULT '{}'
 substitute_players TEXT[] DEFAULT '{}'
-is_active BOOLEAN
+is_active BOOLEAN DEFAULT true
 
 SERVER_PLAYERS:
 discord_id TEXT
 server_id TEXT
 game TEXT
 elo INT
-is_member BOOLEAN
+is_member BOOLEAN DEFAULT true

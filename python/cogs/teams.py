@@ -87,7 +87,7 @@ class Teams:
     @commands.command(pass_context=True)
     @utils.checks.server_subscription()
     @utils.checks.is_team_owner()
-    async def invite(self, ctx, user: discord.User):
+    async def invite(self, ctx, user: utils.converters.CGL_User):
         if user == None:
             await ctx.send("That player could not be identified.")
             return
