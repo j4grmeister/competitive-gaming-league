@@ -21,7 +21,12 @@ class Events:
                     break
 
     async def on_guild_join(self, guild):
-        utils.database.execute(f"INSERT INTO servers (server_id) VALUES ('{guild.id}');")
+        utils.database.execute(f"""
+            INSERT INTO servers (
+                server_id
+            ) VALUES (
+                '{guild.id}'
+            );""")
         utils.database.commit()
 
     async def on_member_join(self, member):
@@ -29,48 +34,79 @@ class Events:
 
         #get the server settings for this server
         utils.database.execute(f"""
-        SELECT
-            default_elo,
-            games,
-            team_roles_enabled,
-            hoist_roles,
-            mention_roles
-        FROM servers
-        WHERE server_id='{guild.id}';
-        """)
+            SELECT
+                default_elo,
+                games,
+                team_roles_enabled,
+                hoist_roles,
+                mention_roles
+            FROM servers
+            WHERE server_id='{guild.id}'
+        ;""")
         default_elo, games, team_roles_enabled, hoist_roles, mention_roles = utils.database.fetchone()
 
         #register the user in this league if they are registered with CGL
         #see if the user is registered with CGL (and get the data that we will need if they are)
         utils.database.execute(f"""
-            SELECT
-                teams
+            SELECT teams
             FROM players
             WHERE discord_id='{member.id}'
         ;""")
         teams, = utils.database.fetchone()
         if teams != None:
             #see if the user has already been a member of this server in the past
-            utils.database.execute(f"SELECT * FROM server_players WHERE discord_id='{member.id}' AND server_id='{guild.id}';")
+            utils.database.execute(f"""
+                SELECT *
+                FROM server_players
+                WHERE
+                    discord_id='{member.id}' AND
+                    server_id='{guild.id}'
+            ;""")
             if utils.database.fetchone() != None:
                 #if they have been a member of this server before, then just update their is_member status and then move on
-                utils.database.execute(f"UPDATE server_players SET is_member=true WHERE discord_id='{member.id}' AND server_id='{guild.id}';")
+                utils.database.execute(f"""
+                    UPDATE server_players
+                    SET is_member=true
+                    WHERE
+                        discord_id='{member.id}' AND
+                        server_id='{guild.id}'
+                ;""")
             else:
                 #create a new server_player entry for each game this server has
                 for g in games:
-                    utils.database.execute(f"""INSERT INTO server_players (discord_id, server_id, is_member, elo, game)
-                        VALUES (
+                    utils.database.execute(f"""
+                        INSERT INTO server_players (
+                            discord_id,
+                            server_id,
+                            is_member,
+                            elo,
+                            game
+                        ) VALUES (
                             '{member.id}',
                             '{guild.id}',
                             true,
                             {default_elo},
                             '{g}'
-                        );""")
+                    );""")
             #for each team that the player is on
             for g in games:
                 if g in teams.keys():
                     #find if this team exists/is active in this server and get necessary data
-                    utils.database.execute(f"SELECT teams.team_name, server_teams.role_id, server_teams.team_elo teams.primary_players, server_teams.primary_players, server_teams.substitute_players FROM server_teams INNER JOIN teams ON server_teams.team_id=teams.team_id WHERE server_teams.server_id='{guild.id}' AND teams.team_id='{teams[g]}';")
+                    utils.database.execute(f"""
+                        SELECT
+                            teams.team_name,
+                            server_teams.role_id,
+                            server_teams.team_elo,
+                            teams.primary_players,
+                            server_teams.primary_players,
+                            server_teams.substitute_players
+                        FROM server_teams
+                            INNER JOIN teams
+                            ON server_teams.team_id=teams.team_id
+                        WHERE
+                            server_teams.server_id='{guild.id}' AND
+                            teams.team_id='{teams[g]}'
+                    ;""")
                     team_name, role_id, team_elo, primary_players, s_primary_players, s_substitute_players = utils.database.fetchone()
                     #determine if this player is a primary player or a substitute
                     roster_field = 'substitute_players'
@@ -79,7 +115,14 @@ class Events:
                     #if this team doesn't exist on this server
                     if team_name == None:
                         #get the player's elo and determine the team elo for this server
-                        utils.database.execute(f"SELECT elo FROM server_players WHERE server_id='{guild.id}' AND discord_id='{member.id}' AND game='{g}';")
+                        utils.database.execute(f"""
+                            SELECT elo
+                            FROM server_players
+                            WHERE
+                                server_id='{guild.id}' AND
+                                discord_id='{member.id}' AND
+                                game='{g}'
+                        ;""")
                         pelo, = utils.database.fetchone()
                         primaryq = utils.config.games[g]['primary_players']
                         telo = (default_elo * (primaryq - 1) + pelo) / primaryq
@@ -90,8 +133,14 @@ class Events:
                             await member.add_roles(trole)
                             troleid = str(trole.id)
                         #create a new server team entry
-                        utils.database.execute(f"""INSERT INTO server_teams (team_id, server_id, team_elo, role_id, {roster_field})
-                            VALUES (
+                        utils.database.execute(f"""
+                            INSERT INTO server_teams (
+                                team_id,
+                                server_id,
+                                team_elo,
+                                role_id,
+                                {roster_field}
+                            ) VALUES (
                                 '{teams[g]}',
                                 '{guild.id}',
                                 '{telo}',
@@ -104,7 +153,14 @@ class Events:
                         #this team is not active on this server
                         if len(s_primary_players) + len(s_substitute_players) == 0:
                             #get the player's elo and determine the team elo for this server
-                            utils.database.execute(f"SELECT elo FROM server_players WHERE server_id='{guild.id}' AND discord_id='{member.id}' AND game='{g}';")
+                            utils.database.execute(f"""
+                                SELECT elo
+                                FROM server_players
+                                WHERE
+                                    server_id='{guild.id}' AND
+                                    discord_id='{member.id}' AND
+                                    game='{g}'
+                            ;""")
                             pelo, = utils.database.fetchone()
                             primaryq = utils.config.games[g]['primary_players']
                             telo = (default_elo * (primaryq - 1) + pelo) / primaryq
@@ -116,11 +172,28 @@ class Events:
                                 troleid = str(trole.id)
 
                             #update the team's server entry
-                            utils.database.execute(f"UPDATE server_teams SET role_id='{troleid}', team_elo={telo}, {roster_field}='{{ \"{member.id}\" }}', is_active=true WHERE server_id='{guild.id}' AND team_id='{teams[g]}';")
+                            utils.database.execute(f"""
+                                UPDATE server_teams
+                                SET
+                                    role_id='{troleid}',
+                                    team_elo={telo},
+                                    {roster_field}='{{ \"{member.id}\" }}',
+                                    is_active=true
+                                WHERE
+                                    server_id='{guild.id}' AND
+                                    team_id='{teams[g]}'
+                            ;""")
                         #this team is active on this server
                         else:
                             #get the player's elo
-                            utils.database.execute(f"SELECT elo FROM server_players WHERE server_id='{guild.id}' AND discord_id='{member.id}' AND game='{g}';")
+                            utils.database.execute(f"""
+                                SELECT elo
+                                FROM server_players
+                                WHERE
+                                    server_id='{guild.id}' AND
+                                    discord_id='{member.id}' AND
+                                    game='{g}'
+                            ;""")
                             p_elo, = utils.database.fetchone()
                             #calculate the new team elo for this server
                             team_size = len(s_primary_players) + len(s_substitute_players)
@@ -132,7 +205,16 @@ class Events:
                             #calculate the average
                             average = sum / max(team_size + 1, utils.config.games[game]['primary_players'])
                             #update this team's server entry
-                            utils.database.execute(f"UPDATE server_teams SET team_elo={average}, {roster_field}=array_append({roster_field}, '{member.id}') WHERE server_id='{guild.id}', AND team_id='{teams[g]}';")
+                            utils.database.execute(f"""
+                                UPDATE server_teams
+                                SET
+                                    team_elo={average},
+                                    {roster_field}=array_append({roster_field},
+                                    '{member.id}')
+                                WHERE
+                                    server_id='{guild.id}' AND
+                                    team_id='{teams[g]}'
+                            ;""")
                             #add roles to this player if needed
                             if team_roles_enabled:
                                 await member.add_roles(guild.get_role(int(role_id)))
@@ -145,34 +227,74 @@ class Events:
 
         #get the server settings for this server
         utils.database.execute(f"""
-        SELECT
-            default_elo,
-            games
-        FROM servers
-        WHERE server_id='{guild.id}';
-        """)
+            SELECT
+                default_elo,
+                games
+            FROM servers
+            WHERE server_id='{guild.id}'
+        ;""")
         default_elo, games = utils.database.fetchone()
         #see if this person is registered
-        utils.database.execute(f"SELECT username, teams, elo FROM players WHERE discord_id='{member.id}';")
+        utils.database.execute(f"""
+            SELECT
+                username,
+                teams,
+                elo
+            FROM players
+            WHERE discord_id='{member.id}'
+        ;""")
         username, teams = utils.database.fetchone()
         if username != None:
             #update the player's is_member status
-            utils.database.execute(f"UPDATE server_players SET is_member=false WHERE discord_id='{member.id}' AND server_id='{guild.id}';")
+            utils.database.execute(f"""
+                UPDATE server_players
+                SET is_member=false
+                WHERE
+                    discord_id='{member.id}' AND
+                    server_id='{guild.id}'
+            ;""")
             #if the player was on any teams team check the size of their server roster
             for g in games:
                 if g in teams.keys():
-                    utils.database.execute(f"SELECT team_elo, role_id, primary_players, substitute_players FROM server_teams WHERE team_id='{teams[g]}' AND server_id='{guild.id}';")
+                    utils.database.execute(f"""
+                        SELECT
+                            team_elo,
+                            role_id,
+                            primary_players,
+                            substitute_players
+                        FROM server_teams
+                        WHERE
+                            team_id='{teams[g]}' AND
+                            server_id='{guild.id}'
+                    ;""")
                     team_elo, role_id, primary_players, substitute_players = utils.database.fetchone()
                     #if the player was the last on their team, make the team inactive
                     if len(primary_players) + len(substitute_players) == 1:
-                        utils.database.execute(f"UPDATE server_teams SET primary_players='{{}}', substitute_players='{{}}', team_elo={default_elo}, is_active=false WHERE team_id='{teams[g]}' AND server_id='{guild.id}';")
+                        utils.database.execute(f"""
+                            UPDATE server_teams
+                            SET
+                                primary_players='{{}}',
+                                substitute_players='{{}}',
+                                team_elo={default_elo},
+                                is_active=false
+                            WHERE
+                                team_id='{teams[g]}' AND
+                                server_id='{guild.id}'
+                        ;""")
                         #delete the team role if needed
                         if role_id != '-1':
                             await guild.get_role(int(role_id)).delete()
                     #otherwise just remove them from the server roster
                     else:
                         #get the player's elo
-                        utils.database.execute(f"SELECT elo FROM server_players WHERE discord_id='{member.id}' AND server_id='{guild.id}' AND game='{g}';")
+                        utils.database.execute(f"""
+                            SELECT elo
+                            FROM server_players
+                            WHERE
+                                discord_id='{member.id}' AND
+                                server_id='{guild.id}' AND
+                                game='{g}'
+                        ;""")
                         pelo, = utils.database.fetchone()
                         #recalculate team elo
                         team_size = len(primary_players) + len(substitute_players)
@@ -182,7 +304,16 @@ class Events:
                             sum += default_elo
                         average = sum / max(team_size - 1, primaryq)
                         #update the team's server entry
-                        utils.database.execute(f"UPDATE server_teams SET team_elo={average}, primary_players=array_remove(primary_players, '{member.id}'), substitute_players=array_remove(substitute_players, '{member.id}') WHERE team_id='{teams[g]}' AND server_id='{guild.id}';")
+                        utils.database.execute(f"""
+                            UPDATE server_teams
+                            SET
+                                team_elo={average},
+                                primary_players=array_remove(primary_players, '{member.id}'),
+                                substitute_players=array_remove(substitute_players, '{member.id}')
+                            WHERE
+                                team_id='{teams[g]}' AND
+                                server_id='{guild.id}'
+                        ;""")
         #commit database changes
         utils.database.commit()
 

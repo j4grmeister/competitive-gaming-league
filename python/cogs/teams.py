@@ -24,7 +24,11 @@ class Teams:
         if game == None:
             return
         #check that the player isnt already on a team for this server's game
-        utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{ctx.author.id}';")
+        utils.database.execute(f"""
+            SELECT teams -> '{game}'
+            FROM players
+            WHERE discord_id='{ctx.author.id}'
+        ;""")
         player_team, = utils.database.fetchone()
         if player_team != None:
             await ctx.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
@@ -35,24 +39,70 @@ class Teams:
         eteam_name = utils.security.escape_sql(team_name)
         #get all the servers that the player is in that have this game as their primary game
         #create team roles as well
-        utils.database.execute(f"SELECT server_id, team_roles_enabled, hoist_roles, mention_roles FROM servers WHERE '{game}'=ANY(games);")
+        utils.database.execute(f"""
+            SELECT
+                server_id,
+                team_roles_enabled,
+                hoist_roles,
+                mention_roles
+            FROM servers
+            WHERE '{game}'=ANY(games)
+        ;""")
         allservers = utils.database.fetchall()
         for sid, team_roles_enabled, hoist_roles, mention_roles in allservers:
             guild = self.bot.get_guild(int(sid))
             member = guild.get_member(ctx.author.id)
             if member != None:
-                utils.database.execute(f"SELECT elo FROM server_players WHERE game='{game}' AND server_id='{ctx.guild.id}' AND discord_id='{ctx.author.id}';")
+                utils.database.execute(f"""
+                    SELECT elo
+                    FROM server_players
+                    WHERE
+                        game='{game}' AND
+                        server_id='{ctx.guild.id}' AND
+                        discord_id='{ctx.author.id}'
+                ;""")
                 team_elo, = utils.database.fetchone()
                 troleid = '-1' #-1 means no role
                 if team_roles_enabled:
                     trole = await guild.create_role(name=team_name, colour=discord.Colour.orange(), hoist=hoist_roles, mentionable=mention_roles)
                     await member.add_roles(trole)
                     troleid = str(trole.id)
-                utils.database.execute(f"INSERT INTO server_teams (server_id, team_id, team_elo, role_id, primary_players) VALUES ('{guild.id}', '{teamid}', {team_elo}, '{troleid}', '{{ \"{ctx.author.id}\" }}');")
+                utils.database.execute(f"""
+                    INSERT INTO server_teams (
+                        server_id,
+                        team_id,
+                        team_elo,
+                        role_id,
+                        primary_players
+                    ) VALUES (
+                        '{guild.id}',
+                        '{teamid}',
+                        {team_elo},
+                        '{troleid}',
+                        '{{ \"{ctx.author.id}\" }}'
+                );""")
         #create the team's database entry
-        utils.database.execute(f"INSERT INTO teams (owner_id, team_id, game, team_name, primary_players) VALUES ('{ctx.author.id}', '{teamid}', '{game}', '{eteam_name}', '{{ \"{ctx.author.id}\" }}');")
+        utils.database.execute(f"""
+            INSERT INTO teams (
+                owner_id,
+                team_id,
+                game,
+                team_name,
+                primary_players
+            ) VALUES (
+                '{ctx.author.id}',
+                '{teamid}',
+                '{game}',
+                '{eteam_name}',
+                '{{ \"{ctx.author.id}\" }}'
+        );""")
         #add the user to the team
-        utils.database.execute(f"UPDATE players SET teams=teams::jsonb || '{{ \"{game}\": \"{teamid}\" }}'::jsonb WHERE discord_id='{ctx.author.id}';")
+        utils.database.execute(f"""
+            UPDATE players
+            SET
+                teams=teams::jsonb || '{{ \"{game}\": \"{teamid}\" }}'::jsonb
+            WHERE discord_id='{ctx.author.id}'
+        ;""")
         #commit changes
         utils.database.commit()
         await ctx.send("Your team has been created.")
@@ -65,22 +115,45 @@ class Teams:
             await ctx.send("Please provide a team name.")
             return
         #get the author's owned teams
-        utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT games FROM servers WHERE server_id='{ctx.guild.id}');")
+        utils.database.execute(f"""
+            SELECT
+                team_id,
+                team_name,
+                game
+            FROM teams
+            WHERE
+                owner_id='{ctx.author.id}' AND
+                game=ANY(
+                    SELECT games
+                    FROM servers
+                    WHERE server_id='{ctx.guild.id}'
+        );""")
         owned_teams = utils.database.fetchall()
         team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to change its name')
         if team == None:
             return
-        utils.database.execute(f"""SELECT server_teams.server_id, server_teams.role_id
+        utils.database.execute(f"""
+            SELECT
+                server_teams.server_id,
+                server_teams.role_id
             FROM server_teams
-            INNER JOIN servers ON server_teams.server_id=servers.server_id
-            WHERE server_teams.team_id='{team}' servers.team_roles_enabled=TRUE;""")
+            INNER JOIN servers
+                ON server_teams.server_id=servers.server_id
+            WHERE
+                server_teams.team_id='{team}' AND
+                servers.team_roles_enabled=TRUE
+        ;""")
         allservers = utils.database.fetchall()
         for sid, role_id in allservers:
             guild = self.bot.get_guild(int(sid))
             role = guild.get_role(int(role_id))
             await role.edit(name=team_name)
         eteam_name = utils.security.escape_sql(team_name)
-        utils.database.execute(f"UPDATE teams SET team_name='{eteam_name}' WHERE team_id='{team}';")
+        utils.database.execute(f"""
+            UPDATE teams
+            SET team_name='{eteam_name}'
+            WHERE team_id='{team}'
+        ;""")
         utils.database.commit()
         await ctx.send("Your team name has been changed.")
 
@@ -92,13 +165,29 @@ class Teams:
             await ctx.send("That player could not be identified.")
             return
         #check that the target user has registered
-        utils.database.execute(f"SELECT username FROM players WHERE discord_id='{user.id}';")
+        utils.database.execute(f"""
+            SELECT username
+            FROM players
+            WHERE discord_id='{user.id}'
+        ;""")
         username, = utils.database.fetchone()
         if username == None:
             await ctx.send("That player is not registered.\nThey can register with **!register <username>**")
             return
         #get the author's owned teams
-        utils.database.execute(f"SELECT team_id, team_name, game FROM teams WHERE owner_id='{ctx.author.id}' AND game=ANY(SELECT unnest(games) FROM servers WHERE server_id='{ctx.guild.id}');")
+        utils.database.execute(f"""
+            SELECT
+                team_id,
+                team_name,
+                game
+            FROM teams
+            WHERE
+                owner_id='{ctx.author.id}' AND
+                game=ANY(
+                    SELECT unnest(games)
+                    FROM servers
+                    WHERE server_id='{ctx.guild.id}'
+        );""")
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
         team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
@@ -106,7 +195,11 @@ class Teams:
             return
         #check that the player is not already on a team for this game
         game = utils.teams.team_game(team)
-        utils.database.execute(f"SELECT teams -> '{game}' FROM players WHERE discord_id='{user.id}';")
+        utils.database.execute(f"""
+            SELECT teams -> '{game}'
+            FROM players
+            WHERE discord_id='{user.id}'
+        ;""")
         player_team, = utils.database.fetchone()
         if player_team != None:
             await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")

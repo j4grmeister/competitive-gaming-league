@@ -14,11 +14,25 @@ class CGL_User(commands.UserConverter):
         try:
             user = await super().convert(ctx, argument)
             discordid = user.id
-            database.execute(f"SELECT elo FROM server_players WHERE discord_id='{discordid}';")
+            database.execute(f"""
+                SELECT elo
+                FROM server_players
+                WHERE discord_id='{discordid}'
+            ;""")
         except:
-            database.execute(f"SELECT discord_id FROM players WHERE lower(username)='{argument.lower()}';")
+            database.execute(f"""
+                SELECT discord_id
+                FROM players
+                WHERE lower(username)='{argument.lower()}'
+            ;""")
             discordid, = database.fetchone()
-            database.execute(f"SELECT elo FROM server_players WHERE server_id='{ctx.guild.id}' AND discord_id='{discordid}';")
+            database.execute(f"""
+            SELECT elo
+            FROM server_players
+            WHERE
+                server_id='{ctx.guild.id}' AND
+                discord_id='{discordid}'
+        ;""")
         elo, = database.fetchone()
         if discordid == None:
             if user == None:
@@ -41,14 +55,31 @@ class CGL_Team(commands.RoleConverter):
         try:
             role = await super().convert(ctx, argument)
             if role != None:
-                database.execute(f"SELECT team_id FROM (SELECT json_each(teams) FROM servers WHERE server_id='{ctx.guild.id}') AS (team_id KEY, role_id TEXT) WHERE role_id='{role}';")
+                database.execute(f"""
+                    SELECT team_id
+                    FROM (
+                        SELECT json_each(teams)
+                        FROM servers
+                        WHERE server_id='{ctx.guild.id}'
+                    ) AS (
+                        team_id KEY,
+                        role_id TEXT)
+                    WHERE role_id='{role}'
+                ;""")
                 team, = database.fetchone()
                 if team == None:
                     await ctx.send("That team doesn't exist")
                     return None
         except:
             pass
-        database.execute(f"SELECT team_id, team_name, game FROM teams WHERE lower(team_name)='{argument.lower()}';")
+        database.execute(f"""
+            SELECT
+                team_id,
+                team_name,
+                game
+            FROM teams
+            WHERE lower(team_name)='{argument.lower()}'
+        ;""")
         allteams = database.fetchall()
         if allteams == None:
             await ctx.send("That team doesn't exist")

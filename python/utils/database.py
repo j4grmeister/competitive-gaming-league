@@ -16,8 +16,16 @@ def fetchall():
 
 #only use if entry is known to exist
 def server_setting(serverid, setting):
-    execute(f"SELECT {setting} FROM servers WHERE server_id='{serverid}';")
+    execute(f"""
+        SELECT {setting}
+        FROM servers
+        WHERE server_id='{serverid}'
+    ;""")
     return fetchone()[0]
 def player_setting(discordid, setting):
-    execute(f"SELECT {setting} FROM players WHERE discord_id='{discordid}';")
+    execute(f"""
+        SELECT {setting}
+        FROM players
+        WHERE discord_id='{discordid}'
+    ;""")
     return fetchone()[0]

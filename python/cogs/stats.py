@@ -14,10 +14,13 @@ class Stats:
                 server_teams.team_elo
             FROM server_teams
             INNER JOIN teams ON server_teams.team_id=teams.team_id
-            WHERE server_teams.server_id='{ctx.guild.id}'
-                AND (array_length(server_teams.primary_players, 0)>0 OR array_length(server_teams.substitute_players, 0)>0)
+            WHERE
+                server_teams.server_id='{ctx.guild.id}' AND
+                    (array_length(server_teams.primary_players, 0)>0 OR
+                    array_length(server_teams.substitute_players, 0)>0)
             ORDER BY server_teams.team_elo DESC
-            LIMIT 10 OFFSET {(page-1)*10};""")
+            LIMIT 10 OFFSET {(page-1)*10}
+        ;""")
         tlist = utils.database.fetchall()
         team_str = ""
         index = (page-1)*10+1
@@ -37,9 +40,23 @@ class Stats:
         if player == None:
             return
         #get player data
-        utils.database.execute(f"SELECT username, teams FROM players WHERE discord_id='{player.id}';")
+        utils.database.execute(f"""
+            SELECT
+                username,
+                teams
+            FROM players
+            WHERE discord_id='{player.id}'
+        ;""")
         username, teams = utils.database.fetchone()
-        utils.database.execute(f"SELECT game, elo FROM server_players WHERE server_id='{ctx.guild.id}' AND discord_id='{player.id}';")
+        utils.database.execute(f"""
+            SELECT
+                game,
+                elo
+            FROM server_players
+            WHERE
+                server_id='{ctx.guild.id}' AND
+                discord_id='{player.id}'
+        ;""")
         allelo = utils.database.fetchall()
         e = discord.Embed(title=username, description=player.mention, colour=discord.Colour.blue())
         e.set_image(url=player.avatar_url)
@@ -49,7 +66,11 @@ class Stats:
         for game, elo in allelo:
             elo_str += f"**{game}:** {elo}\n"
             if game in teams:
-                utils.database.execute(f"SELECT team_name FROM teams WHERE team_id='{teams[game]}';")
+                utils.database.execute(f"""
+                    SELECT team_name
+                    FROM teams
+                    WHERE team_id='{teams[game]}'
+                ;""")
                 teamname, = utils.database.fetchone()
                 teams_str += f"**{game}:** {teamname}\n"
         elo_str = elo_str[:-1]
@@ -63,7 +84,20 @@ class Stats:
     async def teaminfo(self, ctx, *, team: utils.converters.CGL_Team):
         if team == None:
             return
-        utils.database.execute(f"SELECT teams.team_name, server_teams.primary_players, server_teams.substitute_players, server_teams.team_elo, server_teams.role_id FROM teams INNER JOIN server_teams ON teams.team_id=server_teams.team_id WHERE teams.team_id='{team}' AND server_teams.server_id='{ctx.guild.id}';")
+        utils.database.execute(f"""
+            SELECT
+                teams.team_name,
+                server_teams.primary_players,
+                server_teams.substitute_players,
+                server_teams.team_elo,
+                server_teams.role_id
+            FROM teams
+                INNER JOIN server_teams
+                ON teams.team_id=server_teams.team_id
+            WHERE
+                teams.team_id='{team}' AND
+                server_teams.server_id='{ctx.guild.id}'
+        ;""")
         teamname, primary_players, substitute_players, teamelo, roleid = utils.database.fetchone()
         desc = ""
         if roleid != '-1':
