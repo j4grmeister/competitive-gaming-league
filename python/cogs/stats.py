@@ -45,8 +45,13 @@ class Stats:
             return
         #get player data
         utils.database.execute(f"""
+            SELECT username
+            FROM players
+            WHERE discord_id='{ctx.author.id}'
+        ;""")
+        username, = utils.database.fetchone()
+        utils.database.execute(f"""
             SELECT
-                players.username,
                 teams.team_name,
                 teams.game
             FROM players
@@ -82,7 +87,7 @@ class Stats:
             elo_str += f"**{game}:** {elo}\n"
         e.add_field(name='Elo', value=elo_str)
         teams_str = ""
-        for username, teamname, game in allteams:
+        for teamname, game in allteams:
             if len(teams_str) > 0:
                 teams_str += '\n'
             team_str += f"**{game}:** {teamname}"
