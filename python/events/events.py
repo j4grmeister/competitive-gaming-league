@@ -64,7 +64,7 @@ class Events:
                 players.discord_id='{member.id}'
         ;""")
         alldata = utils.database.fetchall()
-        if alldata != None:
+        if username != None:
             if force_usernames:
                 await member.edit(nick=username)
             #see if the user has already been a member of this server in the past
