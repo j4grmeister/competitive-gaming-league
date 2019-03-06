@@ -24,7 +24,7 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         await asyncio.wait_for(selected_object, timeout=timeout)
     except asyncio.TimeoutError:
         embed.clear_fields()
-        e.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
+        embed.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
         await msg.edit(embed=embed)
         utils.cached.delete('select_object', msg.id)
         return None
