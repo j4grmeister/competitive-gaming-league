@@ -92,7 +92,6 @@ class Stats:
                 teams_str += '\n'
             teams_str += f"**{game}:** {teamname}"
         if len(teams_str) > 0:
-            teams_str = teams_str[:-1]
             e.add_field(name='Team', value=teams_str)
         await ctx.send(embed=e)
 

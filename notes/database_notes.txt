@@ -3,10 +3,10 @@ server_id TEXT
 owner_id TEXT
 default_elo INTEGER DEFAULT 1300
 elo_k_factor INTEGER DEFAULT 64
-force_usernames BOOLEAN DEFAULT true
-team_roles_enabled BOOLEAN DEFAULT true
+force_usernames BOOLEAN DEFAULT false
+team_roles_enabled BOOLEAN DEFAULT false
 *default_role BIGINT
-region_roles_enabled BOOLEAN DEFAULT true
+region_roles_enabled BOOLEAN DEFAULT false
 region_roles JSON DEFAULT '{}' {'region': roleid}
 games TEXT[] DEFAULT '{"csgo"}'
 hoist_roles BOOLEAN DEFAULT true
