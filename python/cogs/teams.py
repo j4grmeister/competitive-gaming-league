@@ -20,7 +20,7 @@ class Teams:
         #get the list of games for this server
         guild_games = utils.database.server_setting(ctx.guild.id, 'games')
         #have the user select a game
-        game = await utils.selectors.select_string(ctx.channel, ctx.author, guild_games, title='Select Game', inst='Choose a game for your team')
+        game = await utils.selectors.select_string(ctx, options=guild_games, title='Select Game', inst='Choose a game for your team')
         if game == None:
             return
         #check that the player isnt already on a team for this server's game
@@ -133,7 +133,7 @@ class Teams:
                     WHERE server_id='{ctx.guild.id}'
         );""")
         owned_teams = utils.database.fetchall()
-        team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to change its name')
+        team = await utils.selectors.select_team(ctx, teams=owned_teams, title='Select Team', inst='Select a team to change its name')
         if team == None:
             return
         utils.database.execute(f"""
@@ -194,7 +194,7 @@ class Teams:
         );""")
         owned_teams = utils.database.fetchall()
         #have the user select a team they own
-        team = await utils.selectors.select_team(ctx.channel, ctx.author, owned_teams, title='Select Team', inst='Select a team to send an invite for')
+        team = await utils.selectors.select_team(ctx, teams=owned_teams, title='Select Team', inst='Select a team to send an invite for')
         if team == None:
             return
         #check that the player is not already on a team for this game

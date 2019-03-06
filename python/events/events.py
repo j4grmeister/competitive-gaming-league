@@ -5,8 +5,7 @@ from python.events import reactions
 
 reaction_handlers = [
     reactions.team_invite,
-    reactions.select_string,
-    reactions.select_team
+    reactions.select_object
 ]
 
 class Events:
