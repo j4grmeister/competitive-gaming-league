@@ -130,7 +130,7 @@ async def select_object(bot, reaction, user):
         return True
     else:
         users = await reaction.users().flatten()
-        bot_reacted = (next(u for u in users if u.id == bot.user.id), None) != None)
+        bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
         if bot_reacted:
             selected_index = utils.emoji_list.index(r.emoji)
         else:
