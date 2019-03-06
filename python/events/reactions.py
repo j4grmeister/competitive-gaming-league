@@ -16,11 +16,13 @@ async def team_invite(bot, reaction, user):
         game = utils.teams.team_game(team_id)
         #check that the player is not already on a team for this game
         utils.database.execute(f"""
-            SELECT teams -> '{game}'
-            FROM players
+            SELECT team_id
+            FROM teams
+                INNER JOIN players
+                ON teams.team_id=ANY(players.teams)
             WHERE discord_id='{user.id}'
         ;""")
-        player_team = utils.database.fetchone()[0]
+        player_team, = utils.database.fetchone()
         if player_team != None:
             await msg.delete()
             utils.cache.delete('team_invite_message', msg.id)
@@ -37,7 +39,7 @@ async def team_invite(bot, reaction, user):
         utils.database.execute(f"""
             UPDATE players
             SET
-                teams=teams::jsonb || '{{ \"{game}\": \"{team_id}\" }}'::jsonb
+                teams=array_append(teams, '{{ "{team_id}" }}')
             WHERE discord_id='{user.id}'
         ;""")
         #add the player to the team's roster

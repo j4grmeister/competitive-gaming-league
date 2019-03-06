@@ -9,17 +9,21 @@ class Stats:
     @commands.command(pass_context=True)
     async def teamlist(self, ctx, page=1):
         e = discord.Embed(title='Team List', colour=discord.Colour.blue())
-        utils.database.execute(f"""SELECT teams.team_name,
+        utils.database.execute(f"""
+            SELECT
+                teams.team_name,
                 server_teams.role_id,
                 server_teams.team_elo
             FROM server_teams
-            INNER JOIN teams ON server_teams.team_id=teams.team_id
+                INNER JOIN teams
+                ON server_teams.team_id=teams.team_id
             WHERE
                 server_teams.server_id='{ctx.guild.id}' AND
                     (array_length(server_teams.primary_players, 0)>0 OR
                     array_length(server_teams.substitute_players, 0)>0)
             ORDER BY server_teams.team_elo DESC
-            LIMIT 10 OFFSET {(page-1)*10}
+            LIMIT 10
+            OFFSET {(page-1)*10}
         ;""")
         tlist = utils.database.fetchall()
         team_str = ""
@@ -42,12 +46,22 @@ class Stats:
         #get player data
         utils.database.execute(f"""
             SELECT
-                username,
-                teams
+                players.username,
+                teams.team_name,
+                teams.game
             FROM players
-            WHERE discord_id='{player.id}'
-        ;""")
-        username, teams = utils.database.fetchone()
+                INNER JOIN teams
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                discord_id='{player.id}' AND
+                EXISTS(
+                    SELECT team_id
+                    FROM server_teams
+                    WHERE
+                        team_id=teams.teamid AND
+                        server_id='{ctx.guild.id}'
+        );""")
+        allteams = utils.database.fetchall()
         utils.database.execute(f"""
             SELECT
                 game,
@@ -62,19 +76,16 @@ class Stats:
         e.set_image(url=player.avatar_url)
         #elo and teams
         elo_str = ""
-        teams_str = ""
         for game, elo in allelo:
+            if len(elo_str) > 0:
+                elo_str += '\n'
             elo_str += f"**{game}:** {elo}\n"
-            if game in teams:
-                utils.database.execute(f"""
-                    SELECT team_name
-                    FROM teams
-                    WHERE team_id='{teams[game]}'
-                ;""")
-                teamname, = utils.database.fetchone()
-                teams_str += f"**{game}:** {teamname}\n"
-        elo_str = elo_str[:-1]
         e.add_field(name='Elo', value=elo_str)
+        teams_str = ""
+        for username, teamname, game in allteams:
+            if len(teams_str) > 0:
+                teams_str += '\n'
+            team_str += f"**{game}:** {teamname}"
         if len(teams_str) > 0:
             teams_str = teams_str[:-1]
             e.add_field(name='Team', value=teams_str)

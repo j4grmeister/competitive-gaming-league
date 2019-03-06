@@ -25,9 +25,13 @@ class Teams:
             return
         #check that the player isnt already on a team for this server's game
         utils.database.execute(f"""
-            SELECT teams -> '{game}'
-            FROM players
-            WHERE discord_id='{ctx.author.id}'
+            SELECT teams.team_id
+            FROM teams
+                INNER JOIN players
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                players.discord_id='{ctx.author.id}' AND
+                teams.game='{game}'
         ;""")
         player_team, = utils.database.fetchone()
         if player_team != None:
@@ -100,7 +104,7 @@ class Teams:
         utils.database.execute(f"""
             UPDATE players
             SET
-                teams=teams::jsonb || '{{ \"{game}\": \"{teamid}\" }}'::jsonb
+                teams=array_append(teams, '{teamid}')
             WHERE discord_id='{ctx.author.id}'
         ;""")
         #commit changes
@@ -196,9 +200,13 @@ class Teams:
         #check that the player is not already on a team for this game
         game = utils.teams.team_game(team)
         utils.database.execute(f"""
-            SELECT teams -> '{game}'
-            FROM players
-            WHERE discord_id='{user.id}'
+            SELECT teams.team_id
+            FROM teams
+                INNER JOIN players
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                players.discord_id='{user.id}' AND
+                teams.game='{game}'
         ;""")
         player_team, = utils.database.fetchone()
         if player_team != None:

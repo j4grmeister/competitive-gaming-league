@@ -27,12 +27,12 @@ class CGL_User(commands.UserConverter):
             ;""")
             discordid, = database.fetchone()
             database.execute(f"""
-            SELECT elo
-            FROM server_players
-            WHERE
-                server_id='{ctx.guild.id}' AND
-                discord_id='{discordid}'
-        ;""")
+                SELECT elo
+                FROM server_players
+                WHERE
+                    server_id='{ctx.guild.id}' AND
+                    discord_id='{discordid}'
+            ;""")
         elo, = database.fetchone()
         if discordid == None:
             if user == None:
@@ -57,19 +57,15 @@ class CGL_Team(commands.RoleConverter):
             if role != None:
                 database.execute(f"""
                     SELECT team_id
-                    FROM (
-                        SELECT json_each(teams)
-                        FROM servers
-                        WHERE server_id='{ctx.guild.id}'
-                    ) AS (
-                        team_id KEY,
-                        role_id TEXT)
-                    WHERE role_id='{role}'
+                    FROM server_teams
+                    WHERE
+                        server_id='{ctx.guild.id}' AND
+                        role_id='{role}'
                 ;""")
                 team, = database.fetchone()
                 if team == None:
                     await ctx.send("That team doesn't exist")
-                    return None
+                return team
         except:
             pass
         database.execute(f"""

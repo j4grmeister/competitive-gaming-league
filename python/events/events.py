@@ -48,12 +48,17 @@ class Events:
         #register the user in this league if they are registered with CGL
         #see if the user is registered with CGL (and get the data that we will need if they are)
         utils.database.execute(f"""
-            SELECT teams
-            FROM players
-            WHERE discord_id='{member.id}'
+            SELECT
+                teams.team_id,
+                teams.game
+            FROM teams
+                INNER JOIN players
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                players.discord_id='{member.id}'
         ;""")
-        teams, = utils.database.fetchone()
-        if teams != None:
+        alldata = utils.database.fetchall()
+        if alldata != None:
             #see if the user has already been a member of this server in the past
             utils.database.execute(f"""
                 SELECT *
@@ -89,8 +94,9 @@ class Events:
                             '{g}'
                     );""")
             #for each team that the player is on
-            for g in games:
-                if g in teams.keys():
+            for team_id, g in alldata:
+            #for g in games:
+                if g in games:
                     #find if this team exists/is active in this server and get necessary data
                     utils.database.execute(f"""
                         SELECT
@@ -105,7 +111,7 @@ class Events:
                             ON server_teams.team_id=teams.team_id
                         WHERE
                             server_teams.server_id='{guild.id}' AND
-                            teams.team_id='{teams[g]}'
+                            teams.team_id='{team_id}'
                     ;""")
                     team_name, role_id, team_elo, primary_players, s_primary_players, s_substitute_players = utils.database.fetchone()
                     #determine if this player is a primary player or a substitute
@@ -141,7 +147,7 @@ class Events:
                                 role_id,
                                 {roster_field}
                             ) VALUES (
-                                '{teams[g]}',
+                                '{teams_id}',
                                 '{guild.id}',
                                 '{telo}',
                                 '{troleid}',
@@ -181,7 +187,7 @@ class Events:
                                     is_active=true
                                 WHERE
                                     server_id='{guild.id}' AND
-                                    team_id='{teams[g]}'
+                                    team_id='{teams_id}'
                             ;""")
                         #this team is active on this server
                         else:
@@ -213,7 +219,7 @@ class Events:
                                     '{member.id}')
                                 WHERE
                                     server_id='{guild.id}' AND
-                                    team_id='{teams[g]}'
+                                    team_id='{team_id}'
                             ;""")
                             #add roles to this player if needed
                             if team_roles_enabled:
@@ -235,16 +241,27 @@ class Events:
         ;""")
         default_elo, games = utils.database.fetchone()
         #see if this person is registered
+        #utils.database.execute(f"""
+        #    SELECT
+        #        username,
+        #        teams,
+        #        elo
+        #    FROM players
+        #    WHERE discord_id='{member.id}'
+        #;""")
         utils.database.execute(f"""
             SELECT
-                username,
-                teams,
-                elo
-            FROM players
-            WHERE discord_id='{member.id}'
+                teams.team_id,
+                teams.game
+            FROM teams
+                INNER JOIN players
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                players.discord_id='{member.id}'
         ;""")
-        username, teams = utils.database.fetchone()
-        if username != None:
+        #username, teams = utils.database.fetchone()
+        alldata = utils.database.fetchall()
+        if alldata != None:
             #update the player's is_member status
             utils.database.execute(f"""
                 UPDATE server_players
@@ -254,8 +271,9 @@ class Events:
                     server_id='{guild.id}'
             ;""")
             #if the player was on any teams team check the size of their server roster
-            for g in games:
-                if g in teams.keys():
+            for team_id, g in alldata:
+            #for g in games:
+                if g in games:
                     utils.database.execute(f"""
                         SELECT
                             team_elo,
@@ -264,7 +282,7 @@ class Events:
                             substitute_players
                         FROM server_teams
                         WHERE
-                            team_id='{teams[g]}' AND
+                            team_id='{team_id}' AND
                             server_id='{guild.id}'
                     ;""")
                     team_elo, role_id, primary_players, substitute_players = utils.database.fetchone()
@@ -278,7 +296,7 @@ class Events:
                                 team_elo={default_elo},
                                 is_active=false
                             WHERE
-                                team_id='{teams[g]}' AND
+                                team_id='{team_id}' AND
                                 server_id='{guild.id}'
                         ;""")
                         #delete the team role if needed
@@ -311,7 +329,7 @@ class Events:
                                 primary_players=array_remove(primary_players, '{member.id}'),
                                 substitute_players=array_remove(substitute_players, '{member.id}')
                             WHERE
-                                team_id='{teams[g]}' AND
+                                team_id='{team_id}' AND
                                 server_id='{guild.id}'
                         ;""")
         #commit database changes

@@ -34,6 +34,22 @@ def not_registered():
         return r
     return commands.check(predicate)
 
+def on_team():
+    async def predicate(ctx):
+        database.execute(f"""
+            SELECT players.username
+            FROM players
+                INNER JOIN teams
+                ON teams.team_id=ANY(players.teams)
+            WHERE
+                teams.game=ANY(
+                    SELECT unnest(games)
+                    FROM servers
+                    WHERE server_id='{ctx.guild.id}'
+                ) AND
+                players.discord_id='{ctx.author.id}'
+        ;""")
+
 def is_team_owner():
     async def predicate(ctx):
         database.execute(f"""
