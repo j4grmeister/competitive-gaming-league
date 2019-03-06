@@ -38,14 +38,21 @@ class Events:
                 games,
                 team_roles_enabled,
                 hoist_roles,
-                mention_roles
+                mention_roles,
+                force_usernames
             FROM servers
             WHERE server_id='{guild.id}'
         ;""")
-        default_elo, games, team_roles_enabled, hoist_roles, mention_roles = utils.database.fetchone()
+        default_elo, games, team_roles_enabled, hoist_roles, mention_roles, force_usernames = utils.database.fetchone()
 
         #register the user in this league if they are registered with CGL
         #see if the user is registered with CGL (and get the data that we will need if they are)
+        utils.database.execute(f"""
+            SELECT username
+            FROM players
+            WHERE discord_id='{member.id}'
+        ;""")
+        username, = utils.database.fetchone()
         utils.database.execute(f"""
             SELECT
                 teams.team_id,
@@ -75,6 +82,8 @@ class Events:
                         discord_id='{member.id}' AND
                         server_id='{guild.id}'
                 ;""")
+            if force_usernames:
+                await member.edit(nick=username)
             else:
                 #create a new server_player entry for each game this server has
                 for g in games:
