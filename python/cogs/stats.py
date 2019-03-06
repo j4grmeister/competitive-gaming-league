@@ -58,7 +58,7 @@ class Stats:
                     SELECT team_id
                     FROM server_teams
                     WHERE
-                        team_id=teams.teamid AND
+                        team_id=teams.team_id AND
                         server_id='{ctx.guild.id}'
         );""")
         allteams = utils.database.fetchall()
