@@ -8,7 +8,7 @@ class Owner:
 
     @commands.command(pass_context=True)
     async def settings(self, ctx):
-        
+        e = discord.Embed(title='')
 
     @commands.command(pass_context=True)
     #@utils.checks.server_owner()
