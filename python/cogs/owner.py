@@ -7,6 +7,10 @@ class Owner:
         self.bot = bot
 
     @commands.command(pass_context=True)
+    async def settings(self, ctx):
+        
+
+    @commands.command(pass_context=True)
     #@utils.checks.server_owner()
     async def setting(self, ctx, key, *, value):
         utils.database.execute(f"UPDATE servers SET {key}={value} WHERE server_id='{ctx.guild.id}';")

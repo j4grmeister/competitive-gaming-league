@@ -90,7 +90,7 @@ class Stats:
         for teamname, game in allteams:
             if len(teams_str) > 0:
                 teams_str += '\n'
-            team_str += f"**{game}:** {teamname}"
+            teams_str += f"**{game}:** {teamname}"
         if len(teams_str) > 0:
             teams_str = teams_str[:-1]
             e.add_field(name='Team', value=teams_str)
