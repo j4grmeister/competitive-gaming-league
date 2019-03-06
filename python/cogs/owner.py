@@ -6,15 +6,14 @@ class Owner:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True)
+    @commands.command(pass_context=True)
     async def settings(self, ctx):
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
         e.set_footer(text='Home')
         e.add_field(name=f'{utils.emoji_list[0]} Ranking Settings', value=self.ranking.__doc__)
-        (await utils.selectors.select_object(ctx, objects=[self.ranking], embed=e))()
+        (await utils.selectors.select_object(ctx, objects=[self.ranking_settings], embed=e))()
 
-    @settings.command(pass_context=True)
-    async def ranking(self, ctx):
+    async def ranking_settings(self, ctx):
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
         e.set_footer(text='Ranking Settings')
         e.add_field(name='test', value='test')
