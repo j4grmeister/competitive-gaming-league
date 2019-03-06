@@ -35,7 +35,7 @@ class Teams:
                 ) AND
                 game='{game}'
         ;""")
-        player_team, = utils.database.fetchone()
+        player_team = utils.database.fetchone()
         if player_team != None:
             await ctx.send(f"You are already on a {game} team.\nYou cannot be on more than one team per game.")
             return
