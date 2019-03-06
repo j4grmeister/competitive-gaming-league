@@ -25,13 +25,15 @@ class Teams:
             return
         #check that the player isnt already on a team for this server's game
         utils.database.execute(f"""
-            SELECT teams.team_id
+            SELECT team_id
             FROM teams
-                INNER JOIN players
-                ON teams.team_id=ANY(players.teams)
             WHERE
-                players.discord_id='{ctx.author.id}' AND
-                teams.game='{game}'
+                team_id=ANY(
+                    SELECT unnest(teams)
+                    FROM players
+                    WHERE discord_id='{ctx.author.id}'
+                ) AND
+                game='{game}'
         ;""")
         player_team, = utils.database.fetchone()
         if player_team != None:
