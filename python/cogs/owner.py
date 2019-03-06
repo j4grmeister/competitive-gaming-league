@@ -10,7 +10,7 @@ class Owner:
     async def settings(self, ctx):
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
         e.set_footer(text='Home')
-        e.add_field(name=f'{utils.emoji_list[0]} Ranking Settings', value=self.ranking.__doc__)
+        e.add_field(name=f'{utils.emoji_list[0]} Ranking Settings', value=self.ranking_setting.__doc__)
         await (await utils.selectors.select_object(ctx, objects=[self.ranking_settings], embed=e))()
 
     async def ranking_settings(self, ctx):
