@@ -65,6 +65,8 @@ class Events:
         ;""")
         alldata = utils.database.fetchall()
         if alldata != None:
+            if force_usernames:
+                await member.edit(nick=username)
             #see if the user has already been a member of this server in the past
             utils.database.execute(f"""
                 SELECT *
@@ -82,8 +84,6 @@ class Events:
                         discord_id='{member.id}' AND
                         server_id='{guild.id}'
                 ;""")
-            if force_usernames:
-                await member.edit(nick=username)
             else:
                 #create a new server_player entry for each game this server has
                 for g in games:
