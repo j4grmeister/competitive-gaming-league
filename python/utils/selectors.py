@@ -2,7 +2,7 @@ import discord
 import asyncio
 from python import utils
 
-async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, timeout=60)
+async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, timeout=60):
     if len(objects) == 0:
         return None
     if len(objects) == 1:
