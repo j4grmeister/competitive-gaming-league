@@ -10,7 +10,7 @@ class Owner:
         funcs = []
         count = 0
         for o in options:
-            e.add_field(name=f'{utils.emoji_list[count]} {o[0]}', value=o[2])
+            embed.add_field(name=f'{utils.emoji_list[count]} {o[0]}', value=o[2])
             funcs.append(o[1])
             count += 1
         await (await utils.selectors.select_object(ctx, objects=funcs, embed=embed))(ctx)
