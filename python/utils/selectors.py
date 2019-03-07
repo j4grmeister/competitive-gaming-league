@@ -65,7 +65,7 @@ async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team
         liststr += f"{utils.emoji_list[count]} {team_name} **({game})**"
         count += 1
     e.add_field(name=inst, value=liststr)
-    return await select_object(ctx, *, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
+    return await select_object(ctx, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
 
 async def write_string(ctx, *, title='Write Something', name='Write', inst='Write anything', timeout=60):
     e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
