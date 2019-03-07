@@ -30,6 +30,39 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         return None
     return selected_object.result()
 
+async def select_emoji(ctx, *, options=[], embed=None, timeout=60):
+    if len(options) == 0:
+        return None
+    if len(options) == 1:
+        return options[0]
+    msg = await ctx.send(embed=embed)
+    for e in options:
+        await msg.add_reaction(e)
+    selected_emoji = asyncio.get_event_loop().create_future()
+    def done(emoji):
+        nonlocal selected_emoji
+        selected_emoji = emoji
+    utils.cache.add('select_emoji', msg.id, {'author': ctx.author, 'done': done})
+    try:
+        await asyncio.wait_for(selected_emoji, timeout=timeout)
+    except asyncio.TimeoutError:
+        embed.clear_fields()
+        embed.add_field(name='Time expired', value=f'Response timed out after {timeout} seconds.')
+        await msg.edit(embed=embed)
+        utils.cache.delete('select_emoji', msg.id)
+        return None
+    return selected_emoji.result()
+
+async def confirm(ctx, *, title='Some Category, idk', warning='Are you sure?', message='you don\'t want to do this', footer=None, timeout=60):
+    e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
+    if footer != None:
+        e.set_footer(text=footer)
+    e.add_field(name=warning, value=message)
+    selected_emoji = await select_emoji(ctx, options=[utils.emoji_decline, utils.emoji_confirm], embed=e, timeout=timeout)
+    if selected_emoji == None:
+        return None
+    return (selected_emoji == utils.emoji_confirm)
+
 async def select_string(ctx, *, options=[], title='Select one', inst='Select an option', footer=None, select_multiple=False, timeout=60):
     #options should be a list of strings
     if len(options) == 0:

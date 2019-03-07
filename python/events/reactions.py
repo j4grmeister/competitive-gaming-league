@@ -140,3 +140,19 @@ async def select_object(bot, reaction, user):
     utils.cache.delete('select_index', reaction.message.id)
     await reaction.message.delete()
     return True
+
+async def select_emoji(bot, reaction, user):
+    cached_data = utils.cache.get('select_emoji', reaction.message.id)
+    if cached_data == None:
+        return False
+    author = cached_data['author']
+    if author.id != user.id:
+        return True
+    users = await reaction.users().flatten()
+    bot_reacted = (next((u for u in users if u.id == bot.user.id), None) != None)
+    if not bot_reacted:
+        return True
+    cached_data['done'](reaction.emoji)
+    utils.cache.delete('select_emoji', reaction.message.id)
+    await reaction.message.delete()
+    return True
