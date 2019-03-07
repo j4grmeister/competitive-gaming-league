@@ -2,28 +2,15 @@ import discord
 from discord.ext import commands
 from python import utils
 from python.events import reactions
-from python.events import messages
 
 reaction_handlers = [
     reactions.team_invite,
     reactions.select_object
 ]
 
-message_handlers = [
-    messages.write_string
-]
-
 class Events:
     def __init__(self, bot):
         self.bot = bot
-
-    async def on_message(self, msg):
-        await self.bot.process_commands(msg)
-        if user.id != self.bot.user.id:
-            for handler in message_handlers:
-                #only try handling again if the handle function returns false (indicating the reaction wasn't handled)
-                if await handler(self.bot, msg):
-                    break
 
     async def on_reaction_add(self, reaction, user):
         if user.id != self.bot.user.id:

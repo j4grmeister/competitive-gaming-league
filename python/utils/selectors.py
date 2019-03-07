@@ -66,22 +66,3 @@ async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team
         count += 1
     e.add_field(name=inst, value=liststr)
     return await select_object(ctx, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
-
-async def write_string(ctx, *, title='Write Something', name='Write', inst='Write anything', timeout=60):
-    e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
-    e.add_field(name=name, value=inst)
-    msg = await ctx.send(embed=e)
-    written_string = asyncio.get_event_loop().create_future()
-    def done(string):
-        nonlocal written_string
-        written_string.set_result(string)
-    utils.cache.add('write_string', ctx.channel.id, {'author': ctx.author, 'done': done})
-    try:
-        await asyncio.wait_for(written_string, timeout=timeout)
-    except asyncio.TimeoutError:
-        e.clear_fields()
-        e.add_field(name='Time expired', value=f'Response timed out after {timeout} seconds.')
-        await msg.edit(embed=e)
-        utils.cache.delete('write_string', ctx.channel.id)
-        return None
-    return written_string.result()
