@@ -119,7 +119,7 @@ class Owner:
         ;""")
         default_elo, k = utils.database.fetchone()
         async def f_default_elo(ctx):
-            new_de = await selectors.select_string(ctx, options=[1000, 1100, 1200, 1300, 1400, 1500], title='Server Settings', inst='Select a new default elo', footer='Default Elo')
+            new_de = await utils.selectors.select_string(ctx, options=[1000, 1100, 1200, 1300, 1400, 1500], title='Server Settings', inst='Select a new default elo', footer='Default Elo')
             #don't continue if the selection has timed out
             if new_de != None:
                 #only update settings if the new default is different from the old default
@@ -132,7 +132,7 @@ class Owner:
                     utils.database.commit()
                 await self.ranking_settings(ctx)
         async def f_k_factor(ctx):
-            new_k = await selectors.select_string(ctx, options=[16, 24, 32, 64, 128], title='Server Settings', inst='Select a new k-factor value', footer='k-factor')
+            new_k = await utils.selectors.select_string(ctx, options=[16, 24, 32, 64, 128], title='Server Settings', inst='Select a new k-factor value', footer='k-factor')
             #don't continue if the selection has timed out
             if new_k != None:
                 #only update settings if the new k is different from the old k
