@@ -24,9 +24,9 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         await asyncio.wait_for(selected_object, timeout=timeout)
     except asyncio.TimeoutError:
         embed.clear_fields()
-        embed.add_field(name='Time expired', value=f'Selection timed out after {timeout} seconds.')
+        embed.add_field(name='Time expired', value=f'Response timed out after {timeout} seconds.')
         await msg.edit(embed=embed)
-        utils.cached.delete('select_object', msg.id)
+        utils.cache.delete('select_object', msg.id)
         return None
     return selected_object.result()
 
@@ -47,7 +47,7 @@ async def select_string(ctx, *, options=[], select_multiple=False, title='Select
     e.add_field(name=inst, value=liststr)
     return await select_object(ctx, objects=options, embed=e, select_multiple=select_multiple, timeout=timeout)
 
-async def select_team(ctx, *, teams=[], title='Select team', inst='Select a team', select_multiple=False, timeout=60):
+async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team', select_multiple=False, timeout=60):
     #send a message to have the user select a team from a list
     #teams should be a list of tuples: (team_id, team_name, game)
     if len(teams) == 0:
@@ -65,4 +65,23 @@ async def select_team(ctx, *, teams=[], title='Select team', inst='Select a team
         liststr += f"{utils.emoji_list[count]} {team_name} **({game})**"
         count += 1
     e.add_field(name=inst, value=liststr)
-    return await select_object(ctx, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
+    return await select_object(ctx, *, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
+
+async def write_string(ctx, *, title='Write Something', name='Write', inst='Write anything', timeout=60):
+    e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
+    e.add_field(name=name, value=inst)
+    msg = await ctx.send(embed=e)
+    written_string = asyncio.get_event_loop().create_future()
+    def done(string):
+        nonlocal written_string
+        written_string.set_result(string)
+    utils.cache.add('write_string', ctx.channel.id, {'author': ctx.author, 'done': done})
+    try:
+        await asyncio.wait_for(written_string, timeout=timeout)
+    except asyncio.TimeoutError:
+        e.clear_fields()
+        e.add_field(name='Time expired', value=f'Response timed out after {timeout} seconds.')
+        await msg.edit(embed=e)
+        utils.cache.delete('write_string', ctx.channel.id)
+        return None
+    return written_string.result()
