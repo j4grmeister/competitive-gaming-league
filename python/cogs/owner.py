@@ -23,9 +23,9 @@ class Owner:
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
         e.set_footer(text='Home')
         options = [
-            ('General Settings', self.general_settings, self.general_settings.__init__),
-            ('Team Settings', self.team_settings, self.team_settings.__init__),
-            ('Ranking Settings', self.ranking_settings, self.ranking_settings.__init__)
+            ('General Settings', self.general_settings, self.general_settings.__doc__),
+            ('Team Settings', self.team_settings, self.team_settings.__doc__),
+            ('Ranking Settings', self.ranking_settings, self.ranking_settings.__doc__)
         ]
         await self.menu_select(ctx, e, options)
 
