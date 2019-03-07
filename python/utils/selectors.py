@@ -30,13 +30,15 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         return None
     return selected_object.result()
 
-async def select_string(ctx, *, options=[], select_multiple=False, title='Select one', inst='Select an option', timeout=60):
+async def select_string(ctx, *, options=[], title='Select one', inst='Select an option', footer=None, select_multiple=False, timeout=60):
     #options should be a list of strings
     if len(options) == 0:
         return None
     if len(options) == 1:
         return options[0]
     e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
+    if footer != None:
+        e.set_footer(text=footer)
     liststr = ""
     count = 0
     for o in options:
@@ -47,7 +49,7 @@ async def select_string(ctx, *, options=[], select_multiple=False, title='Select
     e.add_field(name=inst, value=liststr)
     return await select_object(ctx, objects=options, embed=e, select_multiple=select_multiple, timeout=timeout)
 
-async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team', select_multiple=False, timeout=60):
+async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team', footer=None, select_multiple=False, timeout=60):
     #send a message to have the user select a team from a list
     #teams should be a list of tuples: (team_id, team_name, game)
     if len(teams) == 0:
@@ -55,6 +57,8 @@ async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team
     if len(teams) == 1:
         return teams[0][0]
     e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
+    if footer != None:
+        e.set_footer(text=footer)
     liststr = ""
     count = 0
     tids = []
