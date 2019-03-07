@@ -13,7 +13,9 @@ class Owner:
             embed.add_field(name=f'{utils.emoji_list[count]} {o[0]}', value=o[2])
             funcs.append(o[1])
             count += 1
-        await (await utils.selectors.select_object(ctx, objects=funcs, embed=embed))(ctx)
+        f = await utils.selectors.select_object(ctx, objects=funcs, embed=embed)
+        if f != None:
+            await f(ctx)
 
     @commands.command(pass_context=True)
     async def settings(self, ctx):
@@ -58,17 +60,20 @@ class Owner:
                 #get the discord id of all players who are in this server
                 utils.database.execute(f"""
                     SELECT
-                        discord_id,
-                        username
+                        server_players.discord_id,
+                        players.username
                     FROM server_players
+                     INNER JOIN players
+                     ON server_players.discord_id=players.discord_id
                     WHERE
-                        server_id='{ctx.guild.id}' AND
-                        is_member=true
+                        server_players.server_id='{ctx.guild.id}' AND
+                        server_players.is_member=true
                 ;""")
                 allmembers = utils.database.fetchall()
                 for pid, username in allmembers:
                     member = ctx.guild.get_member(int(pid))
                     await member.edit(nick=username)
+            await self.general_settings(ctx)
         options = [
             ('Force Usernames', f_force_usernames, ('Enabled' if force_usernames else 'Disabled')),
             ('Back', self.settings_home, 'Return to the previous page')
