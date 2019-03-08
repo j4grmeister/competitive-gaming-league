@@ -139,7 +139,7 @@ class Owner:
                                     SELECT *
                                     FROM s
                                     WHERE
-                                        discord_id=d_id
+                                        discord_id=d_id AND
                                         game='{tog_game}'
                                 )
                         )
