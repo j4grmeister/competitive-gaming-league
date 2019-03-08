@@ -86,37 +86,27 @@ class Owner:
                 games_str += f"{utils.emoji_list[count]} {g} {utils.emoji_confirm if g in games else utils.emoji_decline}"
                 count += 1
             ge.add_field(name='Select to toggle on/off', value=games_str)
-            tog_games = await utils.selectors.select_object(ctx, objects=list(utils.config.games.keys()), embed=ge, select_multiple=True)
+            tog_game = await utils.selectors.select_object(ctx, objects=list(utils.config.games.keys()), embed=ge)
             #don't continue if the operation timed out
-            if tog_games != None:
-                remove_games = [g for g in tog_games if g in games]
-                add_games = [g for g in tog_games if g not in games]
+            if tog_game != None:
                 #ask the user to confirm removing games
-                if len(remove_games) > 0:
-                    rem_str = ""
-                    sql_str = ""
-                    for g in remove_games:
-                        rem_str += f"\n**{g}**"
-                        if len(sql_str) > 0:
-                            sql_str += ', '
-                        sql_str += g
-                    coninue_remove = await utils.selectors.confirm(ctx, title='Server Settings', warning='Remove games?', footer='Games', message=f'Are you sure you would like to remove games from this server?\nThe following games will be removed from this server:{rem_str}\n*If you wish to migrate game data to another server, contact {self.bot.appinfo.owner.mention}.*')
+                if tog_game in games:
+                    coninue_remove = await utils.selectors.confirm(ctx, title='Server Settings', warning='Remove games?', footer='Games', message=f'Are you sure you would like to remove {tog_game} from this server?\n*If you wish to migrate game data to another server, contact {self.bot.appinfo.owner.mention}.*')
                     if continue_remove:
-                        for g in remove_games:
-                            utils.database.execute(f"""
-                                UPDATE servers
-                                SET games=array_remove(games, '{g}')
-                                WHERE server_id='{ctx.guild.id}'
-                            ;""")
-                            #TODO: remove team roles
-                utils.database.execute(f"""
-                    SELECT
-                        default_elo
-                    FROM servers
-                    WHERE server_id='{ctx.guild.id}'
-                ;""")
-                defalt_elo, = utils.database.fetchone()
-                for g in add_games:
+                        utils.database.execute(f"""
+                            UPDATE servers
+                            SET games=array_remove(games, '{tog_game}')
+                            WHERE server_id='{ctx.guild.id}'
+                        ;""")
+                        #TODO: remove team roles
+                else:
+                    utils.database.execute(f"""
+                        SELECT
+                            default_elo
+                        FROM servers
+                        WHERE server_id='{ctx.guild.id}'
+                    ;""")
+                    defalt_elo, = utils.database.fetchone()
                     utils.database.execute(f"""
                         UPDATE servers
                         SET games=array_append(games, '{g}')
@@ -131,7 +121,7 @@ class Owner:
                         ) SELECT
                             t.discord_id,
                             '{ctx.guild.id}',
-                            '{g}',
+                            '{tog_game}',
                             {default_elo}
                         FROM (
                             SELECT
@@ -154,9 +144,10 @@ class Owner:
                                 ) g
                         ) t
                         WHERE
-                            NOT ANY(g.games)='{g}'
+                            NOT ANY(g.games)='{tog_game}'
                     ;""")
                 utils.database.commit()
+                await self.rank_settings(ctx)
 
         games_str = ""
         for g in games:
@@ -220,7 +211,7 @@ class Owner:
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
                     utils.database.commit()
-                await self.ranking_settings(ctx)
+                await self.rank_settings(ctx)
         async def f_k_factor(ctx):
             new_k = await utils.selectors.select_string(ctx, options=[16, 24, 32, 64, 128], title='Server Settings', inst='Select a new k-factor value', footer='k-factor')
             #don't continue if the selection has timed out
@@ -233,7 +224,7 @@ class Owner:
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
                     utils.database.commit()
-                await self.ranking_settings(ctx)
+                await self.rank_settings(ctx)
         options = [
             ('Default Elo', f_default_elo, f'{default_elo}'),
             ('k-factor', f_k_factor, f'{k}'),
