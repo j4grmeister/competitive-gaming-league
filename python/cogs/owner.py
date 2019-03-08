@@ -144,7 +144,7 @@ class Owner:
                                 ) g
                         ) t
                         WHERE
-                            NOT ANY(g.games)='{tog_game}'
+                            ALL(g.games)<>'{tog_game}'
                     ;""")
                 utils.database.commit()
                 await self.rank_settings(ctx)
