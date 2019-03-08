@@ -120,7 +120,6 @@ async def select_object(bot, reaction, user):
         if reaction.emoji != utils.emoji_confirm:
             return True
         selected_index = []
-        print('find index')
         for r in reaction.message.reactions:
             if r.emoji in utils.emoji_list:
                 users = await reaction.users().flatten()

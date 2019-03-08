@@ -86,7 +86,7 @@ class Owner:
                 games_str += f"{utils.emoji_list[count]} {g} {utils.emoji_confirm if g in games else utils.emoji_decline}"
                 count += 1
             ge.add_field(name='Select to toggle on/off', value=games_str)
-            tog_games = await utils.selectors.select_object(ctx, objects=utils.config.games.keys(), embed=ge, select_multiple=True)
+            tog_games = await utils.selectors.select_object(ctx, objects=list(utils.config.games.keys()), embed=ge, select_multiple=True)
             #don't continue if the operation timed out
             if tog_games != None:
                 remove_games = [g for g in tog_games if g in games]
