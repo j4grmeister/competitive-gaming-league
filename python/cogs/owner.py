@@ -137,7 +137,7 @@ class Owner:
                                             server_id='{ctx.guild.id}'
                                     ) s
                                 ) p,
-                                array_agg(
+                                (
                                     SELECT s.game AS games
                                     FROM s
                                     WHERE p.discord_id=s.discord_id
