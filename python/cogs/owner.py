@@ -27,7 +27,7 @@ class Owner:
         options = [
             ('General Settings', self.general_settings, self.general_settings.__doc__),
             ('Team Settings', self.team_settings, self.team_settings.__doc__),
-            ('Ranking Settings', self.ranking_settings, self.ranking_settings.__doc__)
+            ('Ranking Settings', self.rank_settings, self.ranking_settings.__doc__)
         ]
         await self.menu_select(ctx, e, options)
 
@@ -165,7 +165,7 @@ class Owner:
             games_str += g
         options = [
             ('Force Usernames', f_force_usernames, ('Enabled' if force_usernames else 'Disabled')),
-            ('Games', f_games, games_str)
+            ('Games', f_games, games_str),
             ('Back', self.settings_home, 'Return to the previous page')
         ]
         await self.menu_select(ctx, e, options)
@@ -196,10 +196,10 @@ class Owner:
         ]
         await self.menu_select(ctx, e, options)
 
-    async def ranking_settings(self, ctx):
+    async def rank_settings(self, ctx):
         """View and change settings for player and team ranking."""
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
-        e.set_footer(text='Ranking Settings')
+        e.set_footer(text='Rank Settings')
         utils.database.execute(f"""
             SELECT
                 default_elo,
