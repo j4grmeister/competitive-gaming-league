@@ -120,7 +120,7 @@ class Owner:
                             elo
                         ) SELECT
                             d_id,
-                            '{ctx.guild.id}'
+                            '{ctx.guild.id}',
                             '{tog_game}',
                             {default_elo}
                         FROM (
