@@ -27,7 +27,7 @@ class Owner:
         options = [
             ('General Settings', self.general_settings, self.general_settings.__doc__),
             ('Team Settings', self.team_settings, self.team_settings.__doc__),
-            ('Ranking Settings', self.rank_settings, self.ranking_settings.__doc__)
+            ('Ranking Settings', self.rank_settings, self.rank_settings.__doc__)
         ]
         await self.menu_select(ctx, e, options)
 
