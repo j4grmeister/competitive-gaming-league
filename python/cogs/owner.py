@@ -77,7 +77,7 @@ class Owner:
             await self.general_settings(ctx)
         async def f_games(ctx):
             ge = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
-            ge.set_footer('Games')
+            ge.set_footer(text='Games')
             games_str = ""
             count = 0
             for g in utils.config.games.keys():
