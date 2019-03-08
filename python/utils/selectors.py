@@ -14,6 +14,7 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         await msg.add_reaction(utils.emoji_confirm)
     selected_object = asyncio.get_event_loop().create_future()
     def done(index):
+        print('done')
         nonlocal selected_object
         if select_multiple:
             selected_object.set_result([objects[i] for i in index])
