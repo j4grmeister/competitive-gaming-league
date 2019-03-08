@@ -138,13 +138,13 @@ class Owner:
                                     ) s
                                 ) p,
                                 (
-                                    SELECT s.game AS games
+                                    SELECT s.game AS game
                                     FROM s
                                     WHERE p.discord_id=s.discord_id
                                 ) g
                         ) t
                         WHERE
-                            ALL(g.games)<>'{tog_game}'
+                            '{tog_game}'<>ALL(g.game)
                     ;""")
                 utils.database.commit()
                 await self.rank_settings(ctx)
