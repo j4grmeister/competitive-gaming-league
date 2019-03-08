@@ -106,7 +106,7 @@ class Owner:
                         FROM servers
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
-                    defalt_elo, = utils.database.fetchone()
+                    default_elo, = utils.database.fetchone()
                     utils.database.execute(f"""
                         UPDATE servers
                         SET games=array_append(games, '{g}')
