@@ -119,12 +119,12 @@ class Owner:
                             game,
                             elo
                         ) SELECT
-                            d_id,
+                            d.discord_id,
                             '{ctx.guild.id}',
                             '{tog_game}',
                             {default_elo}
                         FROM (
-                            SELECT DISTINCT s.discord_id AS d_id
+                            SELECT DISTINCT s.discord_id
                             FROM (
                                 SELECT
                                     discord_id,
@@ -139,10 +139,10 @@ class Owner:
                                     SELECT *
                                     FROM s
                                     WHERE
-                                        discord_id=d_id AND
+                                        discord_id=d.discord_id AND
                                         game='{tog_game}'
                                 )
-                        )
+                        ) AS d
                     ;""")
                 utils.database.commit()
                 await self.rank_settings(ctx)
