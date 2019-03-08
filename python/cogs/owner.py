@@ -119,12 +119,12 @@ class Owner:
                             game,
                             elo
                         ) SELECT
-                            d.discord_id,
+                            d.d_id,
                             '{ctx.guild.id}',
                             '{tog_game}',
                             {default_elo}
                         FROM (
-                            SELECT DISTINCT s.discord_id
+                            SELECT DISTINCT s.discord_id AS d_id
                             FROM (
                                 SELECT
                                     discord_id,
@@ -139,7 +139,7 @@ class Owner:
                                     SELECT *
                                     FROM s
                                     WHERE
-                                        discord_id=d.discord_id AND
+                                        discord_id=d_id AND
                                         game='{tog_game}'
                                 )
                         ) AS d
