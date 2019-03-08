@@ -113,37 +113,36 @@ class Owner:
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
                     utils.database.execute(f"""
-                        SELECT
-                            discord_id,
-                            game
-                        INTO @s_player_games
-                        FROM server_players
-                        WHERE server_id='{ctx.guild.id}';
                         INSERT INTO server_players (
                             discord_id,
                             server_id,
                             game,
                             elo
                         ) SELECT
-                            t.discord_id,
-                            '{ctx.guild.id}',
+                            d_id,
+                            '{ctx.guild.id}'
                             '{tog_game}',
                             {default_elo}
                         FROM (
-                            SELECT
-                                p.discord_id
+                            SELECT DISTINCT s.discord_id AS d_id
                             FROM (
-                                    SELECT DISTINCT s.discord_id AS discord_id
-                                    FROM (SELECT * FROM @s_player_games) s
-                                ) p,
-                                (
-                                    SELECT game
-                                    FROM @s_player_games
-                                    WHERE p.discord_id=s.discord_id
-                                ) g
-                        ) t
-                        WHERE
-                            '{tog_game}'<>ALL(g.game)
+                                SELECT
+                                    discord_id,
+                                    game
+                                FROM server_players
+                                WHERE
+                                    server_id='{ctx.guild.id}' AND
+                                    is_member=true
+                            ) s
+                            WHERE
+                                NOT EXISTS (
+                                    SELECT *
+                                    FROM s
+                                    WHERE
+                                        discord_id=d_id
+                                        game='{tog_game}'
+                                )
+                        )
                     ;""")
                 utils.database.commit()
                 await self.rank_settings(ctx)
