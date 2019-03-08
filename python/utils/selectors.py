@@ -60,7 +60,7 @@ async def confirm(ctx, *, title='Some Category, idk', warning='Are you sure?', m
     e.add_field(name=warning, value=message)
     selected_emoji = await select_emoji(ctx, options=[utils.emoji_decline, utils.emoji_confirm], embed=e, timeout=timeout)
     if selected_emoji == None:
-        return None
+        return False
     return (selected_emoji == utils.emoji_confirm)
 
 async def select_string(ctx, *, options=[], title='Select one', inst='Select an option', footer=None, select_multiple=False, timeout=60):

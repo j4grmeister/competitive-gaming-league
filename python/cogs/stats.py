@@ -43,6 +43,13 @@ class Stats:
     async def playerinfo(self, ctx, player: utils.converters.CGL_User):
         if player == None:
             return
+        #get server settings
+        utils.database.execute(f"""
+            SELECT games
+            FROM servers
+            WHERE server_id='{ctx.guild.id}'
+        ;""")
+        games, = utils.database.fetchone()
         #get player data
         utils.database.execute(f"""
             SELECT username
@@ -82,10 +89,12 @@ class Stats:
         #elo and teams
         elo_str = ""
         for game, elo in allelo:
-            if len(elo_str) > 0:
-                elo_str += '\n'
-            elo_str += f"**{game}:** {elo}\n"
-        e.add_field(name='Elo', value=elo_str)
+            if game in games:
+                if len(elo_str) > 0:
+                    elo_str += '\n'
+                elo_str += f"**{game}:** {elo}\n"
+        if len(elo_str) > 0:
+            e.add_field(name='Elo', value=elo_str)
         teams_str = ""
         for teamname, game in allteams:
             if len(teams_str) > 0:

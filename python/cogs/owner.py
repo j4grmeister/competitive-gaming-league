@@ -37,11 +37,12 @@ class Owner:
         e.set_footer(text='Team Settings')
         utils.database.execute(f"""
             SELECT
-                force_usernames
+                force_usernames,
+                games
             FROM servers
             WHERE server_id='{ctx.guild.id}'
         ;""")
-        force_usernames, = utils.database.fetchone()
+        force_usernames, games = utils.database.fetchone()
         async def f_force_usernames(ctx):
             utils.database.execute(f"""
                 UPDATE servers
@@ -74,8 +75,97 @@ class Owner:
                     member = ctx.guild.get_member(int(pid))
                     await member.edit(nick=username)
             await self.general_settings(ctx)
+        async def f_games(ctx):
+            ge = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
+            ge.set_footer('Games')
+            games_str = ""
+            count = 0
+            for g in utils.config.games.keys():
+                if len(games_str) > 0:
+                    games_str += '\n'
+                games_str += f"{utils.emoji_list[count]} {g} {utils.emoji_confirm if g in games else utils.emoji_decline}"
+                count += 1
+            ge.add_field(name='Select to toggle on/off', value=games_str)
+            tog_games = await utils.selectors.select_object(ctx, objects=utils.config.games.keys(), embed=ge, select_multiple=True)
+            #don't continue if the operation timed out
+            if tog_games != None:
+                remove_games = [g for g in tog_games if g in games]
+                add_games = [g for g in tog_games if g not in games]
+                #ask the user to confirm removing games
+                if len(remove_games) > 0:
+                    rem_str = ""
+                    sql_str = ""
+                    for g in remove_games:
+                        rem_str += f"\n**{g}**"
+                        if len(sql_str) > 0:
+                            sql_str += ', '
+                        sql_str += g
+                    coninue_remove = await utils.selectors.confirm(ctx, title='Server Settings', warning='Remove games?', footer='Games', message=f'Are you sure you would like to remove games from this server?\nThe following games will be removed from this server:{rem_str}\n*If you wish to migrate game data to another server, contact {self.bot.appinfo.owner.mention}.*')
+                    if continue_remove:
+                        for g in remove_games:
+                            utils.database.execute(f"""
+                                UPDATE servers
+                                SET games=array_remove(games, '{g}')
+                                WHERE server_id='{ctx.guild.id}'
+                            ;""")
+                            #TODO: remove team roles
+                utils.database.execute(f"""
+                    SELECT
+                        default_elo
+                    FROM servers
+                    WHERE server_id='{ctx.guild.id}'
+                ;""")
+                defalt_elo, = utils.database.fetchone()
+                for g in add_games:
+                    utils.database.execute(f"""
+                        UPDATE servers
+                        SET games=array_append(games, '{g}')
+                        WHERE server_id='{ctx.guild.id}'
+                    ;""")
+                    utils.database.execute(f"""
+                        INSERT INTO server_players (
+                            discord_id,
+                            server_id,
+                            game,
+                            elo
+                        ) SELECT
+                            t.discord_id,
+                            '{ctx.guild.id}',
+                            '{g}',
+                            {default_elo}
+                        FROM (
+                            SELECT
+                                p.discord_id
+                            FROM (
+                                    SELECT DISTINCT s.discord_id AS discord_id
+                                    FROM (
+                                        SELECT
+                                            discord_id AS discord_id,
+                                            game AS game
+                                        FROM server_players
+                                        WHERE
+                                            server_id='{ctx.guild.id}'
+                                    ) s
+                                ) p,
+                                array_agg(
+                                    SELECT s.game AS games
+                                    FROM s
+                                    WHERE p.discord_id=s.discord_id
+                                ) g
+                        ) t
+                        WHERE
+                            NOT ANY(g.games)='{g}'
+                    ;""")
+                utils.database.commit()
+
+        games_str = ""
+        for g in games:
+            if len(games_str) > 0:
+                games_str += '\n'
+            games_str += g
         options = [
             ('Force Usernames', f_force_usernames, ('Enabled' if force_usernames else 'Disabled')),
+            ('Games', f_games, games_str)
             ('Back', self.settings_home, 'Return to the previous page')
         ]
         await self.menu_select(ctx, e, options)
