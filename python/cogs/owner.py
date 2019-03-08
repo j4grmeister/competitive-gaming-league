@@ -113,6 +113,12 @@ class Owner:
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
                     utils.database.execute(f"""
+                        SELECT
+                            discord_id,
+                            game
+                        INTO @s_player_games
+                        FROM server_players
+                        WHERE server_id='{ctx.guild.id}';
                         INSERT INTO server_players (
                             discord_id,
                             server_id,
@@ -128,18 +134,11 @@ class Owner:
                                 p.discord_id
                             FROM (
                                     SELECT DISTINCT s.discord_id AS discord_id
-                                    FROM (
-                                        SELECT
-                                            discord_id AS discord_id,
-                                            game AS game
-                                        FROM server_players
-                                        WHERE
-                                            server_id='{ctx.guild.id}'
-                                    ) s
+                                    FROM (SELECT * FROM @s_player_games) s
                                 ) p,
                                 (
-                                    SELECT s.game AS game
-                                    FROM s
+                                    SELECT game
+                                    FROM @s_player_games
                                     WHERE p.discord_id=s.discord_id
                                 ) g
                         ) t
