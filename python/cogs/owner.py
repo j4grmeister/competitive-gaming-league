@@ -133,7 +133,7 @@ class Owner:
                                 WHERE
                                     server_id='{ctx.guild.id}' AND
                                     is_member=true
-                            ) s
+                            ) AS s
                             WHERE
                                 NOT EXISTS (
                                     SELECT *
