@@ -17,6 +17,7 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
             selected_object.set_result(objects[index])
     utils.cache.add('select_object', msg.id, {'author': ctx.author, 'done': done, 'select_multiple': select_multiple})
     for x in range(len(objects)):
+        print(msg)
         await msg.add_reaction(utils.emoji_list[x])
     if select_multiple:
         await msg.add_reaction(utils.emoji_confirm)
@@ -48,6 +49,7 @@ async def select_emoji(ctx, *, options=[], embed=None, timeout=60):
     except asyncio.TimeoutError:
         embed.clear_fields()
         embed.add_field(name='Time expired', value=f'Response timed out after {timeout} seconds.')
+        print(msg)
         await msg.edit(embed=embed)
         utils.cache.delete('select_emoji', msg.id)
         return None
