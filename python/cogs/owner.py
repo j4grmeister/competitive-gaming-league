@@ -233,5 +233,12 @@ class Owner:
         utils.database.commit()
         await ctx.send("Database reset")
 
+    @commands.command(pass_context=True)
+    async def resetserver(self, ctx):
+        utils.database.execute(f"DELETE FROM servers WHERE server_id='{ctx.guild.id}';")
+        utils.database.execute(f"INSERT INTO servers (server_id) VALUES ('{ctx.guild.id}');")
+        utils.database.commit()
+        await ctx.send("Database reset")
+
 def setup(bot):
     bot.add_cog(Owner(bot))
