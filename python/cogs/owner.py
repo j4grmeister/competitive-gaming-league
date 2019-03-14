@@ -86,10 +86,7 @@ class Owner:
                 games_str += f"{utils.emoji_list[count]} {g} {utils.emoji_confirm if g in games else utils.emoji_decline}"
                 count += 1
             ge.add_field(name='Select to toggle on/off', value=games_str)
-            op = list(utils.config.games.keys())
-            print(op)
-            tog_game = await utils.selectors.select_object(ctx, objects=op, embed=ge)
-            print(tog_game)
+            tog_game = await utils.selectors.select_object(ctx, objects=list(utils.config.games.keys()), embed=ge)
             #don't continue if the operation timed out
             if tog_game != None:
                 #ask the user to confirm removing games
@@ -112,7 +109,7 @@ class Owner:
                     default_elo, = utils.database.fetchone()
                     utils.database.execute(f"""
                         UPDATE servers
-                        SET games=array_append(games, '{g}')
+                        SET games=array_append(games, '{tog_game}')
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
 
