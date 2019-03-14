@@ -137,7 +137,15 @@ class Owner:
                             WHERE
                                 NOT EXISTS (
                                     SELECT *
-                                    FROM s
+                                    FROM (
+                                        SELECT
+                                            discord_id,
+                                            game
+                                        FROM server_players
+                                        WHERE
+                                            server_id='{ctx.guild.id}' AND
+                                            is_member=true
+                                    ) AS s
                                     WHERE
                                         discord_id=d_id AND
                                         game='{tog_game}'

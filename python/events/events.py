@@ -70,14 +70,16 @@ class Events:
                 await member.edit(nick=username)
             #see if the user has already been a member of this server in the past
             utils.database.execute(f"""
-                SELECT *
+                SELECT game
                 FROM server_players
                 WHERE
                     discord_id='{member.id}' AND
                     server_id='{guild.id}'
             ;""")
-            if utils.database.fetchone() != None:
-                #if they have been a member of this server before, then just update their is_member status and then move on
+            data = utils.database.fetchall()
+            if data != None:
+                #if they have been a member of this server before,
+                #update their is_member status and then move on
                 utils.database.execute(f"""
                     UPDATE server_players
                     SET is_member=true
@@ -85,6 +87,25 @@ class Events:
                         discord_id='{member.id}' AND
                         server_id='{guild.id}'
                 ;""")
+                #add any games in this server that they don't have entries for
+                player_games = [r[0] for r in data]
+                for g in games:
+                    if g not in player_games:
+                        utils.database.execute(f"""
+                            INSERT INTO server_players (
+                                discord_id,
+                                server_id,
+                                is_member,
+                                elo,
+                                game
+                            ) VALUES (
+                                '{member.id}',
+                                '{guild.id}',
+                                true,
+                                {default_elo},
+                                '{g}'
+                            )
+                        ;""")
             else:
                 #create a new server_player entry for each game this server has
                 for g in games:
