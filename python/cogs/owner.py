@@ -112,46 +112,32 @@ class Owner:
                         SET games=array_append(games, '{g}')
                         WHERE server_id='{ctx.guild.id}'
                     ;""")
+
                     utils.database.execute(f"""
-                        INSERT INTO server_players (
+                        SELECT
                             discord_id,
-                            server_id,
-                            game,
-                            elo
-                        ) SELECT
-                            d.d_id,
-                            '{ctx.guild.id}',
-                            '{tog_game}',
-                            {default_elo}
-                        FROM (
-                            SELECT DISTINCT s.discord_id AS d_id
-                            FROM (
-                                SELECT
-                                    discord_id,
-                                    game
-                                FROM server_players
-                                WHERE
-                                    server_id='{ctx.guild.id}' AND
-                                    is_member=true
-                            ) AS s
-                            WHERE
-                                NOT EXISTS (
-                                    SELECT *
-                                    FROM (
-                                        SELECT
-                                            discord_id,
-                                            game
-                                        FROM server_players
-                                        WHERE
-                                            server_id='{ctx.guild.id}' AND
-                                            is_member=true
-                                    ) AS s
-                                    WHERE
-                                        discord_id=d_id AND
-                                        game='{tog_game}'
-                                )
-                        ) AS d
+                            game
+                        FROM server_players
+                        WHERE
+                            server_id='{ctx.guild.id}' AND
+                            is_member=True
                     ;""")
+                    temp = utils.database.fetchall()
+                    p_list = list(dict.fromkeys(r1[0] for r1 in temp if tog_game not in [r2[1] for r2 in temp if r2[0]==r1[0]]))
+                    for discord_id in p_list:
+                        utils.database.execute(f"""
+                            INSERT INTO server_players (
+                                discord_id,
+                                server_id,
+                                game,
+                                elo
+                            ) VALUES (
+                                '{discord_id}',
+                                '{ctx.guild.id}',
+                                '{tog_game}',
+                                {default_elo}
+                            )
+                        ;""")
                 utils.database.commit()
                 await self.rank_settings(ctx)
 
