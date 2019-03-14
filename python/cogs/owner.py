@@ -34,7 +34,7 @@ class Owner:
     async def general_settings(self, ctx):
         """View and change general settings for this server."""
         e = discord.Embed(title='Server Settings', description=ctx.author.mention, colour=discord.Colour.blue())
-        e.set_footer(text='Team Settings')
+        e.set_footer(text='General Settings')
         utils.database.execute(f"""
             SELECT
                 force_usernames,
@@ -139,7 +139,7 @@ class Owner:
                             )
                         ;""")
                 utils.database.commit()
-                await self.rank_settings(ctx)
+                await self.general_settings(ctx)
 
         games_str = ""
         for g in games:

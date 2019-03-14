@@ -8,10 +8,6 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
     if len(objects) == 1:
         return objects[0]
     msg = await ctx.send(embed=embed)
-    for x in range(len(objects)):
-        await msg.add_reaction(utils.emoji_list[x])
-    if select_multiple:
-        await msg.add_reaction(utils.emoji_confirm)
     selected_object = asyncio.get_event_loop().create_future()
     def done(index):
         nonlocal selected_object
@@ -20,6 +16,10 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
         else:
             selected_object.set_result(objects[index])
     utils.cache.add('select_object', msg.id, {'author': ctx.author, 'done': done, 'select_multiple': select_multiple})
+    for x in range(len(objects)):
+        await msg.add_reaction(utils.emoji_list[x])
+    if select_multiple:
+        await msg.add_reaction(utils.emoji_confirm)
     try:
         await asyncio.wait_for(selected_object, timeout=timeout)
     except asyncio.TimeoutError:
@@ -36,13 +36,13 @@ async def select_emoji(ctx, *, options=[], embed=None, timeout=60):
     if len(options) == 1:
         return options[0]
     msg = await ctx.send(embed=embed)
-    for e in options:
-        await msg.add_reaction(e)
     selected_emoji = asyncio.get_event_loop().create_future()
     def done(emoji):
         nonlocal selected_emoji
         selected_emoji = emoji
     utils.cache.add('select_emoji', msg.id, {'author': ctx.author, 'done': done})
+    for e in options:
+        await msg.add_reaction(e)
     try:
         await asyncio.wait_for(selected_emoji, timeout=timeout)
     except asyncio.TimeoutError:
