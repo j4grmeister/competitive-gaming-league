@@ -89,6 +89,7 @@ class Owner:
             op = list(utils.config.games.keys())
             print(op)
             tog_game = await utils.selectors.select_object(ctx, objects=op, embed=ge)
+            print(tog_game)
             #don't continue if the operation timed out
             if tog_game != None:
                 #ask the user to confirm removing games
