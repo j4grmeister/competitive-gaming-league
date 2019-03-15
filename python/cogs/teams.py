@@ -274,6 +274,7 @@ class Teams:
                 return
             #if the user is the owner of the team, ask to pick another player to be the new owner
             if owner_id == ctx.author.id:
+                print('owner')
                 otherplayers = primary_players + substitute_players
                 otherplayers.remove(ctx.author.id)
                 new_owner = await utils.selectors.select_player(ctx,
