@@ -312,6 +312,7 @@ class Teams:
                     pass
             #update the database
             roster_field = 'primary_players' if ctx.author.id in primary_players else 'substitute_players'
+            print(roster_field)
             utils.database.execute(f"""
                 UPDATE teams
                 SET {roster_field}=array_remove({roster_field}, '{ctx.author.id}')
