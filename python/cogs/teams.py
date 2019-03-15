@@ -273,8 +273,7 @@ class Teams:
                 await ctx.send(f'You have left {team_name}.')
                 return
             #if the user is the owner of the team, ask to pick another player to be the new owner
-            if owner_id == ctx.author.id:
-                print('owner')
+            if int(owner_id) == ctx.author.id:
                 otherplayers = primary_players + substitute_players
                 otherplayers.remove(ctx.author.id)
                 new_owner = await utils.selectors.select_player(ctx,
@@ -284,7 +283,6 @@ class Teams:
                     footer='leave team')
                 if new_owner == None:
                     return
-                print(new_owner)
                 utils.database.execute(f"""
                     UPDATE teams
                     SET owner_id='{new_owner}'
