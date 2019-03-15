@@ -247,7 +247,7 @@ class Teams:
                 INNER JOIN teams
                 ON t.team=teams.team_id
             WHERE
-                teams.game=ANY(
+                teams.game IN (
                     SELECT games
                     FROM servers
                     WHERE server_id='{ctx.guild.id}'
