@@ -46,7 +46,7 @@ def is_on_team():
                 INNER JOIN teams
                 ON t.team=teams.team_id
             WHERE
-                teams.game=ANY(
+                teams.game IN (
                     SELECT unnest(games)
                     FROM servers
                     WHERE server_id='{ctx.guild.id}'
