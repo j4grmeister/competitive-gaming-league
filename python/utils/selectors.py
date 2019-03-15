@@ -17,6 +17,8 @@ async def select_object(ctx, *, objects=[], embed=None, select_multiple=False, t
             selected_object.set_result(objects[index])
     utils.cache.add('select_object', msg.id, {'author': ctx.author, 'done': done, 'select_multiple': select_multiple})
     for x in range(len(objects)):
+        if selected_object.done():
+            break
         await msg.add_reaction(utils.emoji_list[x])
     if select_multiple:
         await msg.add_reaction(utils.emoji_confirm)
@@ -42,6 +44,8 @@ async def select_emoji(ctx, *, options=[], embed=None, timeout=60):
         selected_emoji.set_result(emoji)
     utils.cache.add('select_emoji', msg.id, {'author': ctx.author, 'done': done})
     for e in options:
+        if selected_emoji.done():
+            break
         await msg.add_reaction(e)
     try:
         await asyncio.wait_for(selected_emoji, timeout=timeout)
