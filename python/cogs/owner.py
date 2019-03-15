@@ -91,7 +91,7 @@ class Owner:
             if tog_game != None:
                 #ask the user to confirm removing games
                 if tog_game in games:
-                    coninue_remove = await utils.selectors.confirm(ctx, title='Server Settings', warning='Remove games?', footer='Games', message=f'Are you sure you would like to remove {tog_game} from this server?\n*If you wish to migrate game data to another server, contact {self.bot.appinfo.owner.mention}.*')
+                    continue_remove = await utils.selectors.confirm(ctx, title='Server Settings', warning='Remove games?', footer='Games', message=f'Are you sure you would like to remove {tog_game} from this server?\n*If you wish to migrate game data to another server, contact {self.bot.appinfo.owner.mention}.*')
                     if continue_remove:
                         utils.database.execute(f"""
                             UPDATE servers
