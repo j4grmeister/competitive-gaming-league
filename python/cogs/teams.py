@@ -248,7 +248,7 @@ class Teams:
                 ON t.team=teams.team_id
             WHERE
                 teams.game IN (
-                    SELECT games
+                    SELECT unnest(games)
                     FROM servers
                     WHERE server_id='{ctx.guild.id}'
                 )
