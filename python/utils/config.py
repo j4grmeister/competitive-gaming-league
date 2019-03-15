@@ -19,7 +19,7 @@ games = {
     },
     'overwatch': {
         'name': 'Overwatch',
-        'short_name': 'Overwatch'
+        'short_name': 'Overwatch',
         'has_teams': True,
         'primary_players': 6
     },
