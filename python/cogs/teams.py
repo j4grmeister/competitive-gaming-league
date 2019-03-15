@@ -322,8 +322,14 @@ class Teams:
                 SET {roster_field}=array_remove({roster_field}, '{ctx.author.id}')
                 WHERE team_id='{team}'
             ;""")
+            utils.database.execute(f"""
+                UPDATE players
+                SET teams=array_remove(teams, '{team}')
+                WHERE discord_id='{ctx.author.id}'
+            ;""")
             #commit database changes
             utils.database.commit()
+            await ctx.send(f'You have left {team_name}.')
 
 def setup(bot):
     bot.add_cog(Teams(bot))
