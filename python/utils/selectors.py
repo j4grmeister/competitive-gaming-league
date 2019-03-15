@@ -39,7 +39,7 @@ async def select_emoji(ctx, *, options=[], embed=None, timeout=60):
     selected_emoji = asyncio.get_event_loop().create_future()
     def done(emoji):
         nonlocal selected_emoji
-        selected_emoji = emoji
+        selected_emoji.set_result(emoji)
     utils.cache.add('select_emoji', msg.id, {'author': ctx.author, 'done': done})
     for e in options:
         await msg.add_reaction(e)
@@ -59,8 +59,6 @@ async def confirm(ctx, *, title='Some Category, idk', warning='Are you sure?', m
         e.set_footer(text=footer)
     e.add_field(name=warning, value=message)
     selected_emoji = await select_emoji(ctx, options=[utils.emoji_decline, utils.emoji_confirm], embed=e, timeout=timeout)
-    if selected_emoji == None:
-        return False
     return (selected_emoji == utils.emoji_confirm)
 
 async def select_string(ctx, *, options=[], title='Select one', inst='Select an option', footer=None, select_multiple=False, timeout=60):
