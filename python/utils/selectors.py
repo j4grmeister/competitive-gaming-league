@@ -103,3 +103,33 @@ async def select_team(ctx, *, teams=[], title='Select Team', inst='Select a team
         count += 1
     e.add_field(name=inst, value=liststr)
     return await select_object(ctx, objects=tids, embed=e, select_multiple=select_multiple, timeout=timeout)
+
+async def select_player(ctx, *, players=[], title='Select Player', inst='Select a player', footer=None, select_multiple=False, timeout=60):
+    #players should be a list of discordids
+    if len(players) == 0:
+        return None
+    if len(players) == 1:
+        return players[0]
+    e = discord.Embed(title=title, description=ctx.author.mention, colour=discord.Colour.blue())
+    if footer != None:
+        e.set_footer(text=footer)
+    liststr = ""
+    count = 0
+    for p in players:
+        if len(liststr) > 0:
+            liststr += '\n'
+        pstr = None
+        m = ctx.guild.get_member(int(p))
+        if m == None:
+            utils.database.execute(f"""
+                SELECT username
+                FROM players
+                WHERE discord_id='{p}'
+            ;""")
+            pstr, = utils.database.fetchone()
+        else:
+            pstr = m.mention
+        liststr += f"{utils.emoji_list[count]} {pstr}"
+        count += 1
+    e.add_field(name=inst, value=liststr)
+    return await select_object(ctx, objects=players, embed=e, select_multiple=select_multiple, timeout=timeout)

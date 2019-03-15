@@ -16,7 +16,7 @@ PLAYERS:
 discord_id TEXT
 username TEXT
 #steam_id TEXT
-teams JSON DEFAULT '{}' {'game': teamid}
+teams TEXT[] DEFAULT '{}'
 awards JSON DEFAULT '{}' {'serverid': ["award"]}
 region TEXT
 

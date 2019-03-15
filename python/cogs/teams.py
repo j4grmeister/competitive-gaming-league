@@ -224,5 +224,104 @@ class Teams:
         utils.cache.add('team_invite_message', msg.id, team)
         await ctx.send(f"{username} has been invited to {team_name}.")
 
+    @commands.command(pass_context=True)
+    @utils.checks.server_subscription()
+    @utils.checks.is_on_team()
+    async def leaveteam(self, ctx):
+        #get the teams the player is on
+        utils.database.execute(f"""
+            SELECT
+                t.team,
+                teams.team_name,
+                teams.game,
+                teams.owner_id,
+                teams.primary_players,
+                teams.substitute_players
+            FROM (
+                SELECT unnest(teams) AS team
+                FROM players
+                WHERE discord_id='{ctx.author.id}'
+            ) AS t
+                INNER JOIN teams
+                ON t.team=teams.team_id
+            WHERE
+                teams.game=ANY(
+                    SELECT games
+                    FROM servers
+                    WHERE server_id='{ctx.guild.id}'
+                )
+        ;""")
+        tlist = utils.database.fetchall()
+        team = await utils.selectors.select_team(ctx, teams=tlist, title='Select Team', inst='Select a team to leave', footer='leave team')
+        #get the selected team
+        if team == None:
+            return
+        teaminfo = next((r for r in tlist if r[0]==team), [])
+        team, team_name, game, owner_id, primary_players, substitute_players = teaminfo
+        #ask for confirmation
+        confirmed = await utils.selectors.confirm(ctx,
+            title='Are you sure?',
+            warning=f'Are you sure you would like to leave {team_name}?',
+            message='You will need to be reinvited to join again. If you are the last member of the team, it will be disbanded and all stats will be lost forever.',
+            footer='leave team')
+        if confirmed:
+            #if the user is the last player on the team, disband the team
+            if len(primary_players) + len(substitute_players) <= 1:
+                await utils.teams.disband_team(team)
+                await ctx.send(f'You have left {team_name}.')
+                return
+            #if the user is the owner of the team, ask to pick another player to be the new owner
+            if owner_id == ctx.author.id:
+                otherplayers = primary_players + substitute_players
+                otherplayers.remove(ctx.author.id)
+                new_owner = await utils.selectors.select_player(ctx,
+                    players=otherplayers,
+                    title='Select New Owner',
+                    inst=f'Select a new owner for {team_name}',
+                    footer='leave team')
+                if new_owner == None:
+                    return
+                utils.database.execute(f"""
+                    UPDATE teams
+                    SET owner_id='{new_owner}'
+                    WHERE team_id='{team}'
+                ;""")
+            #remove the user from the team
+            #remove team roles from all servers
+            utils.database.execute(f"""
+                SELECT
+                    server_id,
+                    role_id
+                FROM server_teams
+                WHERE
+                    team_id='{team}' AND
+                    is_active=true
+            ;""")
+            for sid, rid in utils.database.fetchall():
+                if int(rid) == -1:
+                    continue
+                guild = self.bot.get_guild(int(sid))
+                m = guild.get_member(ctx.author.id)
+                if m == None:
+                    continue
+                try:
+                    await m.remove_roles(guild.get_role(int(rid)), reason='Player left team.')
+                except:
+                    pass
+            #update the database
+            roster_field = 'primary_players' if ctx.author.id in primary_players else 'substitute_players'
+            utils.database.execute(f"""
+                UPDATE teams
+                SET {roster_field}=array_remove({roster_field}, '{ctx.author.id}')
+                WHERE team_id='{team}'
+            ;""")
+            utils.database.execute(f"""
+                UPDATE server_teams
+                SET {roster_field}=array_remove({roster_field}, '{ctx.author.id}')
+                WHERE team_id='{team}'
+            ;""")
+            #commit database changes
+            utils.database.commit()
+
 def setup(bot):
     bot.add_cog(Teams(bot))

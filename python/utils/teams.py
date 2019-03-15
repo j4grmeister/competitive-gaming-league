@@ -50,3 +50,6 @@ def substitute_players(team_id):
         WHERE team_id='{team_id}'
     ;""")
     return database.fetchone()[0]
+
+async def disband_team(team_id):
+    pass
