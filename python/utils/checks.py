@@ -47,7 +47,7 @@ def is_on_team():
                 ON t.team=teams.team_id
             WHERE
                 teams.game=ANY(
-                    SELECT games
+                    SELECT unnest(games)
                     FROM servers
                     WHERE server_id='{ctx.guild.id}'
                 )
