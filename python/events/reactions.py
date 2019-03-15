@@ -22,7 +22,9 @@ async def team_invite(bot, reaction, user):
                 ON teams.team_id=ANY(players.teams)
             WHERE discord_id='{user.id}'
         ;""")
-        player_team, = utils.database.fetchone()
+        player_team = utils.database.fetchone()
+        if player_team != None:
+            player_team = player_team[0]
         if player_team != None:
             await msg.delete()
             utils.cache.delete('team_invite_message', msg.id)
