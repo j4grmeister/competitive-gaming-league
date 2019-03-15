@@ -210,7 +210,9 @@ class Teams:
                 players.discord_id='{user.id}' AND
                 teams.game='{game}'
         ;""")
-        player_team, = utils.database.fetchone()
+        player_team = utils.database.fetchone()
+        if player_team != None:
+            player_team = player_team[0]
         if player_team != None:
             await ctx.send(f"That player is already on a {game} team.\nYou cannot be on more than one team per game.")
             return
