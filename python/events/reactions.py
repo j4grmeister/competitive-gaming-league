@@ -40,8 +40,7 @@ async def team_invite(bot, reaction, user):
         #add the team to the player's database entry
         utils.database.execute(f"""
             UPDATE players
-            SET
-                teams=array_append(teams, '{{ "{team_id}" }}')
+            SET teams=array_append(teams, '{team_id}')
             WHERE discord_id='{user.id}'
         ;""")
         #add the player to the team's roster
