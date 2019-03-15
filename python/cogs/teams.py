@@ -283,6 +283,7 @@ class Teams:
                     footer='leave team')
                 if new_owner == None:
                     return
+                print(new_owner)
                 utils.database.execute(f"""
                     UPDATE teams
                     SET owner_id='{new_owner}'
